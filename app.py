@@ -98,6 +98,63 @@ def parse_csv_row(row):
     }
 
 
+def calculate_diff_stats(main_content, feat_content):
+    """
+    Intelligently calculate diff statistics using SequenceMatcher
+    Returns accurate counts of added, removed, modified, and unchanged lines
+    """
+    from difflib import SequenceMatcher
+    
+    main_lines = main_content.splitlines()
+    feat_lines = feat_content.splitlines()
+    
+    # Initialize counters
+    added = 0
+    removed = 0
+    modified = 0
+    unchanged = 0
+    
+    # Use SequenceMatcher for accurate line-by-line comparison
+    matcher = SequenceMatcher(None, main_lines, feat_lines)
+    
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == 'equal':
+            # Lines are identical
+            unchanged += (i2 - i1)
+        elif tag == 'delete':
+            # Lines only in main (removed in feat)
+            removed += (i2 - i1)
+        elif tag == 'insert':
+            # Lines only in feat (added in feat)
+            added += (j2 - j1)
+        elif tag == 'replace':
+            # Lines exist in both but are different (modified)
+            # Count the number of modified lines as the minimum of the two ranges
+            # The difference goes to added or removed
+            main_count = i2 - i1
+            feat_count = j2 - j1
+            
+            if main_count == feat_count:
+                # Same number of lines, all modified
+                modified += main_count
+            elif main_count > feat_count:
+                # More lines in main, some were modified, some were removed
+                modified += feat_count
+                removed += (main_count - feat_count)
+            else:
+                # More lines in feat, some were modified, some were added
+                modified += main_count
+                added += (feat_count - main_count)
+    
+    return {
+        'unchanged': unchanged,
+        'modified': modified,
+        'added': added,
+        'removed': removed,
+        'total': max(len(main_lines), len(feat_lines))
+    }
+
+
 def compare_files(feat_path, main_path):
     """
     Compare two files and return differences
@@ -208,39 +265,8 @@ def compare():
     except Exception as e:
         return jsonify({'error': f'Error reading files: {str(e)}'}), 500
     
-    # Calculate statistics
-    main_lines = main_content.splitlines()
-    feat_lines = feat_content.splitlines()
-    
-    # Simple line-based diff statistics
-    main_set = set(main_lines)
-    feat_set = set(feat_lines)
-    
-    unchanged = len(main_set & feat_set)
-    added = len(feat_set - main_set)
-    removed = len(main_set - feat_set)
-    
-    # Modified lines are harder to determine without proper diff
-    # Using SequenceMatcher for better accuracy
-    from difflib import SequenceMatcher
-    matcher = SequenceMatcher(None, main_lines, feat_lines)
-    
-    modified = 0
-    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == 'replace':
-            modified += max(i2 - i1, j2 - j1)
-        elif tag == 'delete':
-            removed = max(removed, i2 - i1)
-        elif tag == 'insert':
-            added = max(added, j2 - j1)
-    
-    stats = {
-        'unchanged': unchanged,
-        'modified': modified,
-        'added': added,
-        'removed': removed,
-        'total': max(len(main_lines), len(feat_lines))
-    }
+    # Calculate statistics using intelligent diff algorithm
+    stats = calculate_diff_stats(main_content, feat_content)
     
     return jsonify({
         'folder_id': folder,
