@@ -186,24 +186,69 @@ def get_structure():
 
 @app.route('/api/compare')
 def compare():
-    """Compare two files"""
+    """Compare two files and return full contents for Monaco Editor"""
     folder = request.args.get('folder')
-    base_id = request.args.get('id')
+    file_id = request.args.get('file')
     
-    if not folder or not base_id:
+    if not folder or not file_id:
         return jsonify({'error': 'Missing parameters'}), 400
     
-    feat_path = ARTIFACTS_DIR / folder / f"{base_id}-feat"
-    main_path = ARTIFACTS_DIR / folder / f"{base_id}-main"
+    feat_path = ARTIFACTS_DIR / folder / f"{file_id}-feat"
+    main_path = ARTIFACTS_DIR / folder / f"{file_id}-main"
     
     if not feat_path.exists() or not main_path.exists():
         return jsonify({'error': 'Files not found'}), 404
     
-    result = compare_files(feat_path, main_path)
-    result['folder'] = folder
-    result['base_id'] = base_id
+    # Read full file contents
+    try:
+        with open(main_path, 'r', encoding='utf-8') as f:
+            main_content = f.read()
+        with open(feat_path, 'r', encoding='utf-8') as f:
+            feat_content = f.read()
+    except Exception as e:
+        return jsonify({'error': f'Error reading files: {str(e)}'}), 500
     
-    return jsonify(result)
+    # Calculate statistics
+    main_lines = main_content.splitlines()
+    feat_lines = feat_content.splitlines()
+    
+    # Simple line-based diff statistics
+    main_set = set(main_lines)
+    feat_set = set(feat_lines)
+    
+    unchanged = len(main_set & feat_set)
+    added = len(feat_set - main_set)
+    removed = len(main_set - feat_set)
+    
+    # Modified lines are harder to determine without proper diff
+    # Using SequenceMatcher for better accuracy
+    from difflib import SequenceMatcher
+    matcher = SequenceMatcher(None, main_lines, feat_lines)
+    
+    modified = 0
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == 'replace':
+            modified += max(i2 - i1, j2 - j1)
+        elif tag == 'delete':
+            removed = max(removed, i2 - i1)
+        elif tag == 'insert':
+            added = max(added, j2 - j1)
+    
+    stats = {
+        'unchanged': unchanged,
+        'modified': modified,
+        'added': added,
+        'removed': removed,
+        'total': max(len(main_lines), len(feat_lines))
+    }
+    
+    return jsonify({
+        'folder_id': folder,
+        'file_id': file_id,
+        'main_content': main_content,
+        'feat_content': feat_content,
+        'stats': stats
+    })
 
 
 @app.route('/api/upload', methods=['POST'])
