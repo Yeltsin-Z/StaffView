@@ -818,8 +818,30 @@
 
                         console.log('Creating Monaco Diff Editor...');
 
+                        // Define custom theme with our colors
+                        monaco.editor.defineTheme('staffview-theme', {
+                            base: 'vs-dark',
+                            inherit: true,
+                            rules: [],
+                            colors: {
+                                // Added lines (green)
+                                'diffEditor.insertedTextBackground': '#2ea44f33',
+                                'diffEditor.insertedLineBackground': '#2ea44f1a',
+                                
+                                // Removed lines (red)
+                                'diffEditor.removedTextBackground': '#cf222e33',
+                                'diffEditor.removedLineBackground': '#cf222e1a',
+                                
+                                // Border between panels
+                                'diffEditor.border': '#30363d',
+                                
+                                // Diff viewport
+                                'diffEditor.diagonalFill': '#667eea20',
+                            }
+                        });
+
                         diffEditor = monaco.editor.createDiffEditor(diffContainer, {
-                            theme: 'vs-dark',
+                            theme: 'staffview-theme',
                             automaticLayout: true,
                             readOnly: true,
                             renderSideBySide: true,
@@ -837,7 +859,11 @@
                                 useShadows: true,
                                 verticalScrollbarSize: 10,
                                 horizontalScrollbarSize: 10
-                            }
+                            },
+                            // Experimental: enable better diff algorithm
+                            diffAlgorithm: 'advanced',
+                            ignoreTrimWhitespace: false,
+                            renderIndicators: true
                         });
 
                         const originalModel = monaco.editor.createModel(originalContent, 'text/plain');
