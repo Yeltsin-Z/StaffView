@@ -366,7 +366,8 @@
             overflow: hidden;
             min-height: 400px;
             height: 100%;
-            background: #1e1e1e;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
         }
         
         #monaco-diff-editor {
@@ -488,61 +489,40 @@
             padding-top: 0 !important;
         }
 
-        /* Monaco Editor Diff Color Customization */
-        /* Lines added in feat (green) */
-        .monaco-diff-editor .insert-sign,
-        .monaco-diff-editor .line-insert {
-            background-color: rgba(46, 164, 79, 0.2) !important;
+        /* Monaco Editor Light Theme Enhancements */
+        /* Modified line custom decoration */
+        .modified-line-decoration {
+            background-color: rgba(251, 133, 0, 0.08) !important;
         }
         
-        .monaco-diff-editor .char-insert {
-            background-color: rgba(46, 164, 79, 0.4) !important;
-        }
-
-        /* Lines removed from main (red) */
-        .monaco-diff-editor .delete-sign,
-        .monaco-diff-editor .line-delete {
-            background-color: rgba(207, 34, 46, 0.2) !important;
+        /* Add subtle border to diff panels */
+        .monaco-diff-editor .editor.original,
+        .monaco-diff-editor .editor.modified {
+            border: 1px solid #e1e4e8;
         }
         
-        .monaco-diff-editor .char-delete {
-            background-color: rgba(207, 34, 46, 0.4) !important;
-        }
-
-        /* Lines modified (orange/yellow) */
-        .monaco-diff-editor .line-insert.char-insert,
-        .monaco-diff-editor .line-delete.char-delete {
-            background-color: rgba(251, 133, 0, 0.15) !important;
-        }
-
-        /* Gutter (line numbers area) colors */
-        .monaco-diff-editor .margin .insert-sign {
-            background-color: rgba(46, 164, 79, 0.3) !important;
-        }
-
-        .monaco-diff-editor .margin .delete-sign {
-            background-color: rgba(207, 34, 46, 0.3) !important;
-        }
-
-        /* Side-by-side diff specific colors */
+        /* Better visibility for diff navigator arrows */
         .monaco-diff-editor .diffViewport {
-            background-color: rgba(102, 126, 234, 0.1) !important;
+            background: rgba(102, 126, 234, 0.05) !important;
         }
-
-        /* Inline diff colors for changed characters */
-        .monaco-editor .line-insert .char-insert,
-        .monaco-editor .inline-added-margin-view-zone {
-            background-color: rgba(46, 164, 79, 0.3) !important;
+        
+        /* Enhance line number area */
+        .monaco-editor .margin {
+            background-color: #f6f8fa !important;
         }
-
-        .monaco-editor .line-delete .char-delete,
-        .monaco-editor .inline-deleted-margin-view-zone {
-            background-color: rgba(207, 34, 46, 0.3) !important;
+        
+        /* Better scrollbar in light theme */
+        .monaco-scrollable-element > .scrollbar > .slider {
+            background: rgba(0, 0, 0, 0.2) !important;
         }
-
-        /* Selection highlight colors */
-        .monaco-diff-editor .diffViewport .diffViewportOverlay {
-            background-color: rgba(102, 126, 234, 0.2) !important;
+        
+        .monaco-scrollable-element > .scrollbar > .slider:hover {
+            background: rgba(0, 0, 0, 0.35) !important;
+        }
+        
+        /* Improve diff overview ruler visibility */
+        .monaco-editor .decorationsOverviewRuler {
+            border-left: 1px solid #e1e4e8;
         }
 
         /* Animations */
@@ -818,30 +798,62 @@
 
                         console.log('Creating Monaco Diff Editor...');
 
-                        // Define custom theme with our colors
-                        monaco.editor.defineTheme('staffview-theme', {
-                            base: 'vs-dark',
+                        // Define custom light theme with our colors
+                        monaco.editor.defineTheme('staffview-light-theme', {
+                            base: 'vs',
                             inherit: true,
-                            rules: [],
+                            rules: [
+                                { token: 'comment', foreground: '6c757d', fontStyle: 'italic' },
+                                { token: 'keyword', foreground: '0550ae', fontStyle: 'bold' },
+                                { token: 'string', foreground: '0a3069' },
+                            ],
                             colors: {
-                                // Added lines (green)
-                                'diffEditor.insertedTextBackground': '#2ea44f33',
-                                'diffEditor.insertedLineBackground': '#2ea44f1a',
+                                // Editor background
+                                'editor.background': '#ffffff',
+                                'editor.foreground': '#24292e',
+                                'editor.lineHighlightBackground': '#f6f8fa',
+                                'editor.selectionBackground': '#667eea30',
                                 
-                                // Removed lines (red)
-                                'diffEditor.removedTextBackground': '#cf222e33',
-                                'diffEditor.removedLineBackground': '#cf222e1a',
+                                // Line numbers
+                                'editorLineNumber.foreground': '#8b949e',
+                                'editorLineNumber.activeForeground': '#24292e',
                                 
-                                // Border between panels
-                                'diffEditor.border': '#30363d',
+                                // Added lines (green) - lighter for better readability
+                                'diffEditor.insertedTextBackground': '#dcffe440',
+                                'diffEditor.insertedLineBackground': '#dcffe420',
+                                
+                                // Removed lines (red) - lighter for better readability
+                                'diffEditor.removedTextBackground': '#ffe5e540',
+                                'diffEditor.removedLineBackground': '#ffe5e520',
+                                
+                                // Border between panels - more visible
+                                'diffEditor.border': '#d0d7de',
+                                
+                                // Gutter
+                                'editorGutter.background': '#f6f8fa',
+                                'editorGutter.modifiedBackground': '#fb8500',
+                                'editorGutter.addedBackground': '#2ea44f',
+                                'editorGutter.deletedBackground': '#cf222e',
+                                
+                                // Overview ruler (minimap)
+                                'editorOverviewRuler.border': '#e1e4e8',
+                                'editorOverviewRuler.addedForeground': '#2ea44f',
+                                'editorOverviewRuler.deletedForeground': '#cf222e',
+                                'editorOverviewRuler.modifiedForeground': '#fb8500',
+                                
+                                // Scrollbar
+                                'scrollbar.shadow': '#e1e4e8',
+                                'scrollbarSlider.background': '#d0d7de80',
+                                'scrollbarSlider.hoverBackground': '#959da5',
+                                'scrollbarSlider.activeBackground': '#6c757d',
                                 
                                 // Diff viewport
-                                'diffEditor.diagonalFill': '#667eea20',
+                                'diffEditor.diagonalFill': '#f6f8fa',
                             }
                         });
 
                         diffEditor = monaco.editor.createDiffEditor(diffContainer, {
-                            theme: 'staffview-theme',
+                            theme: 'staffview-light-theme',
                             automaticLayout: true,
                             readOnly: true,
                             renderSideBySide: true,
