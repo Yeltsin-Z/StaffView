@@ -19,7 +19,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: white;
+            background: #fafbfc;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -33,31 +33,36 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px 30px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.25);
             z-index: 1000;
+            position: relative;
         }
 
         .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        .header-center {
+            flex: 1;
+            text-align: center;
         }
 
         .header h1 {
-            font-size: 2em;
+            font-size: 2.2em;
             font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
         }
 
-        .header p {
-            opacity: 0.9;
-            margin-top: 5px;
+        .header-tagline {
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 500;
         }
 
         .back-button {
@@ -68,113 +73,133 @@
             background: rgba(255, 255, 255, 0.2);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-2px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-right {
+            width: 150px;
+            text-align: right;
         }
 
         .main-content {
             display: flex;
             flex: 1;
             overflow: hidden;
+            background: #fafbfc;
         }
 
         .sidebar {
-            width: 320px;
-            background: #f8f9fa;
-            border-right: 1px solid #e0e0e0;
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e1e4e8;
             overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #fafbfc;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #c0c0c0;
-            border-radius: 5px;
+            background: #d1d5da;
+            border-radius: 4px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #a0a0a0;
+            background: #959da5;
         }
 
         .sidebar-header {
             padding: 25px;
-            background: white;
-            border-bottom: 2px solid #e0e0e0;
+            background: linear-gradient(180deg, #f6f8fa 0%, white 100%);
+            border-bottom: 2px solid #e1e4e8;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .sidebar-header h2 {
-            font-size: 1.3em;
-            color: #333;
+            font-size: 1.2em;
+            color: #24292e;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
         }
 
         .sidebar-header p {
             font-size: 0.9em;
-            color: #666;
+            color: #586069;
+            font-weight: 500;
         }
 
         .folder-group {
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e1e4e8;
         }
 
         .folder-header {
-            padding: 15px 25px;
+            padding: 14px 25px;
             background: white;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
             user-select: none;
+            border-left: 3px solid transparent;
         }
 
         .folder-header:hover {
-            background: #f0f0f0;
+            background: #f6f8fa;
         }
 
         .folder-header.active {
-            background: linear-gradient(90deg, #e8edff 0%, transparent 100%);
-            border-left: 4px solid #667eea;
+            background: linear-gradient(90deg, #f0f4ff 0%, white 100%);
+            border-left-color: #667eea;
         }
 
         .folder-name {
             font-weight: 600;
-            color: #333;
+            color: #24292e;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1em;
+            font-size: 0.95em;
+        }
+
+        .folder-icon {
+            font-size: 1.2em;
         }
 
         .folder-count {
-            background: #e8edff;
-            color: #667eea;
-            padding: 4px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 10px;
             border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 600;
+            font-size: 0.8em;
+            font-weight: 700;
+            min-width: 24px;
+            text-align: center;
         }
 
         .file-list {
             display: none;
-            background: #fafafa;
+            background: #fafbfc;
         }
 
         .file-list.active {
@@ -184,15 +209,17 @@
         .file-item {
             padding: 12px 25px 12px 50px;
             cursor: pointer;
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 0.9em;
         }
 
         .file-item:hover {
-            background: #f0f0f0;
+            background: white;
+            border-left-color: #d1d5da;
         }
 
         .file-item.active {
@@ -202,25 +229,29 @@
             font-weight: 600;
         }
 
+        .file-icon {
+            font-size: 1.1em;
+        }
+
         .editor-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #1e1e1e;
+            background: white;
             overflow: hidden;
         }
 
         .editor-header {
-            background: white;
-            padding: 20px 30px;
-            border-bottom: 1px solid #e0e0e0;
+            background: linear-gradient(180deg, #f6f8fa 0%, white 100%);
+            padding: 25px 35px;
+            border-bottom: 2px solid #e1e4e8;
         }
 
         .editor-title {
-            font-size: 1.5em;
+            font-size: 1.6em;
             font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
+            color: #24292e;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -228,10 +259,11 @@
 
         .editor-subtitle {
             font-size: 0.95em;
-            color: #666;
+            color: #586069;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            font-weight: 500;
         }
 
         .branch-label {
@@ -241,83 +273,91 @@
             padding: 6px 14px;
             border-radius: 8px;
             font-size: 0.9em;
-            font-weight: 600;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .branch-label.feat {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            background: linear-gradient(135deg, #2ea44f 0%, #238636 100%);
             color: white;
         }
 
         .branch-label.main {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #0969da 0%, #0550ae 100%);
             color: white;
         }
 
         .stats-bar {
             display: flex;
-            gap: 20px;
-            padding: 15px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 0.95em;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 15px;
+            padding: 18px 35px;
+            background: white;
+            border-bottom: 1px solid #e1e4e8;
+            font-size: 0.9em;
+            flex-wrap: wrap;
         }
 
         .stat-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            border-radius: 8px;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .stat-badge.added {
-            background: #d1fae5;
-            color: #065f46;
+            background: linear-gradient(135deg, #dcffe4 0%, #c6f6d5 100%);
+            color: #0f5132;
+            border: 1px solid #9ae6b4;
         }
 
         .stat-badge.removed {
-            background: #fee2e2;
-            color: #991b1b;
+            background: linear-gradient(135deg, #ffe5e5 0%, #ffd0d0 100%);
+            color: #842029;
+            border: 1px solid #f5b7b1;
         }
 
         .stat-badge.modified {
-            background: #fef3c7;
-            color: #92400e;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            color: #664d03;
+            border: 1px solid #ffc947;
         }
 
         .stat-badge.unchanged {
-            background: #e5e7eb;
-            color: #374151;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            color: #495057;
+            border: 1px solid #c0c0c0;
         }
 
         .stat-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
         }
 
         .stat-badge.added .stat-dot {
-            background: #10b981;
+            background: #2ea44f;
         }
 
         .stat-badge.removed .stat-dot {
-            background: #ef4444;
+            background: #cf222e;
         }
 
         .stat-badge.modified .stat-dot {
-            background: #f59e0b;
+            background: #fb8500;
         }
 
         .stat-badge.unchanged .stat-dot {
-            background: #6b7280;
+            background: #6c757d;
         }
 
         .diff-container {
@@ -326,6 +366,7 @@
             overflow: hidden;
             min-height: 400px;
             height: 100%;
+            background: #1e1e1e;
         }
         
         #monaco-diff-editor {
@@ -340,28 +381,31 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #666;
+            color: #586069;
             text-align: center;
-            padding: 40px;
-            background: white;
+            padding: 60px;
+            background: linear-gradient(180deg, #fafbfc 0%, white 100%);
         }
 
         .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 5em;
+            margin-bottom: 25px;
+            opacity: 0.3;
+            filter: drop-shadow(0 4px 20px rgba(102, 126, 234, 0.2));
         }
 
         .empty-state h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.5em;
+            color: #24292e;
+            margin-bottom: 12px;
+            font-size: 1.6em;
+            font-weight: 700;
         }
 
         .empty-state p {
-            max-width: 450px;
-            line-height: 1.6;
-            color: #666;
+            max-width: 500px;
+            line-height: 1.7;
+            color: #586069;
+            font-size: 1.05em;
         }
 
         .loading {
@@ -370,13 +414,13 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            background: white;
+            background: linear-gradient(180deg, #fafbfc 0%, white 100%);
         }
 
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid #e0e0e0;
+            border: 4px solid #e1e4e8;
             border-top-color: #667eea;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -388,8 +432,9 @@
         }
 
         .loading p {
-            color: #666;
+            color: #586069;
             font-size: 1.1em;
+            font-weight: 500;
         }
 
         .no-artifacts {
@@ -402,41 +447,61 @@
         }
 
         .no-artifacts-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 5em;
+            margin-bottom: 25px;
+            opacity: 0.3;
         }
 
         .no-artifacts h3 {
-            color: #333;
-            font-size: 1.3em;
-            margin-bottom: 10px;
+            color: #24292e;
+            font-size: 1.4em;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
 
         .no-artifacts p {
-            color: #666;
+            color: #586069;
             margin-bottom: 30px;
-            line-height: 1.6;
+            line-height: 1.7;
+            font-size: 1.05em;
         }
 
         .no-artifacts a {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 14px 28px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: transform 0.2s;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .no-artifacts a:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
         }
 
         /* Monaco Editor overrides */
         .monaco-editor {
             padding-top: 0 !important;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .folder-group, .file-item, .stat-badge {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
@@ -449,18 +514,19 @@
                         <span>←</span>
                         <span>Dashboard</span>
                     </a>
-                    <div>
-                        <h1>⚡ StaffView</h1>
-                        <p>Regression artifacts comparison</p>
-                    </div>
                 </div>
+                <div class="header-center">
+                    <h1>⚡ StaffView</h1>
+                    <p class="header-tagline">Regression artifacts comparison</p>
+                </div>
+                <div class="header-right"></div>
             </div>
         </div>
 
         <div class="main-content">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <h2>📦 Artifacts</h2>
+                    <h2><span>📦</span> Artifacts</h2>
                     <p id="artifacts-count">Loading...</p>
                 </div>
                 <div id="sidebar"></div>
@@ -542,7 +608,7 @@
                     <div class="folder-group">
                         <div class="folder-header" onclick="toggleFolder('${folderId}')">
                             <span class="folder-name">
-                                <span>📁</span>
+                                <span class="folder-icon">📁</span>
                                 <span>Tenant ${folderId}</span>
                             </span>
                             <span class="folder-count">${fileCount}</span>
@@ -554,7 +620,7 @@
                     const icon = fileId.startsWith('CHART') ? '📊' : '📋';
                     html += `
                         <div class="file-item" onclick="selectFile('${folderId}', '${fileId}')">
-                            <span>${icon}</span>
+                            <span class="file-icon">${icon}</span>
                             <span>${fileId}</span>
                         </div>
                     `;
@@ -641,8 +707,9 @@
                 </div>
                 <div class="editor-subtitle">
                     <span>Tenant ${data.folder_id}</span>
+                    <span>•</span>
                     <span class="branch-label main">⎇ main</span>
-                    <span>↔</span>
+                    <span>vs</span>
                     <span class="branch-label feat">⎇ feat</span>
                 </div>
             `;
@@ -651,29 +718,21 @@
             const statsBar = document.createElement('div');
             statsBar.className = 'stats-bar';
             statsBar.innerHTML = `
-                <div class="stat-item">
-                    <div class="stat-badge added">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.added}</strong> added</span>
-                    </div>
+                <div class="stat-badge added">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.added}</strong> added</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-badge removed">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.removed}</strong> removed</span>
-                    </div>
+                <div class="stat-badge removed">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.removed}</strong> removed</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-badge modified">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.modified}</strong> modified</span>
-                    </div>
+                <div class="stat-badge modified">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.modified}</strong> modified</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-badge unchanged">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.unchanged}</strong> unchanged</span>
-                    </div>
+                <div class="stat-badge unchanged">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.unchanged}</strong> unchanged</span>
                 </div>
             `;
 
@@ -765,19 +824,19 @@
             container.style.display = 'flex';
             container.style.flexDirection = 'row';
             container.style.gap = '1px';
-            container.style.background = '#e0e0e0';
+            container.style.background = '#e1e4e8';
             
             const createPanel = (lines, title) => {
                 const panel = document.createElement('div');
                 panel.style.flex = '1';
                 panel.style.overflow = 'auto';
                 panel.style.background = 'white';
-                panel.style.color = '#333';
+                panel.style.color = '#24292e';
                 panel.style.fontFamily = 'Consolas, Monaco, monospace';
                 panel.style.fontSize = '13px';
                 panel.style.padding = '10px';
                 
-                let html = `<div style="color: #666; padding: 5px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
+                let html = `<div style="color: #586069; padding: 5px 0; border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
                 lines.forEach((line, i) => {
                     html += `<div style="padding: 2px 5px; white-space: pre;">${i+1} | ${line}</div>`;
                 });
