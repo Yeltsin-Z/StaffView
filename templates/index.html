@@ -490,9 +490,14 @@
         }
 
         /* Monaco Editor Light Theme Enhancements */
-        /* Modified line custom decoration */
+        /* Modified line custom decoration - enhanced visibility */
         .modified-line-decoration {
-            background-color: rgba(251, 133, 0, 0.25) !important;
+            background: linear-gradient(90deg, 
+                rgba(251, 133, 0, 0.35) 0%, 
+                rgba(251, 133, 0, 0.2) 3%, 
+                rgba(251, 133, 0, 0.15) 100%) !important;
+            border-left: 3px solid #fb8500 !important;
+            box-shadow: inset 0 0 0 1px rgba(251, 133, 0, 0.15) !important;
         }
         
         /* Add subtle border to diff panels */
@@ -511,6 +516,13 @@
             background-color: #f6f8fa !important;
         }
         
+        /* Highlight line numbers for modified lines */
+        .monaco-editor .line-numbers.modified-line-decoration {
+            background-color: rgba(251, 133, 0, 0.3) !important;
+            color: #fb8500 !important;
+            font-weight: bold !important;
+        }
+        
         /* Better scrollbar in light theme */
         .monaco-scrollable-element > .scrollbar > .slider {
             background: rgba(0, 0, 0, 0.2) !important;
@@ -523,6 +535,11 @@
         /* Improve diff overview ruler visibility */
         .monaco-editor .decorationsOverviewRuler {
             border-left: 1px solid #e1e4e8;
+        }
+        
+        /* Enhanced gutter indicators for modified lines */
+        .monaco-editor .margin-view-overlays .modified-line-decoration {
+            background: rgba(251, 133, 0, 0.4) !important;
         }
 
         /* Animations */
@@ -860,11 +877,13 @@
                             enableSplitViewResizing: true,
                             scrollBeyondLastLine: false,
                             minimap: {
-                                enabled: true
+                                enabled: true,
+                                showSlider: 'always'
                             },
                             fontSize: 13,
                             lineNumbers: 'on',
                             renderWhitespace: 'selection',
+                            glyphMargin: true,
                             scrollbar: {
                                 vertical: 'auto',
                                 horizontal: 'auto',
@@ -875,7 +894,9 @@
                             // Experimental: enable better diff algorithm
                             diffAlgorithm: 'advanced',
                             ignoreTrimWhitespace: false,
-                            renderIndicators: true
+                            renderIndicators: true,
+                            renderOverviewRuler: true,
+                            overviewRulerBorder: true
                         });
 
                         const originalModel = monaco.editor.createModel(originalContent, 'text/plain');
@@ -912,7 +933,7 @@
                                         
                                         // If line counts match or are similar, treat as modification
                                         if (originalLineCount > 0 && modifiedLineCount > 0) {
-                                            // Add yellow background to original side
+                                            // Add enhanced yellow decoration to original side
                                             originalDecorations.push({
                                                 range: new monaco.Range(
                                                     change.originalStartLineNumber,
@@ -923,19 +944,20 @@
                                                 options: {
                                                     isWholeLine: true,
                                                     className: 'modified-line-decoration',
-                                                    backgroundColor: 'rgba(251, 133, 0, 0.3)',
+                                                    linesDecorationsClassName: 'modified-line-gutter',
                                                     overviewRuler: {
-                                                        color: 'rgba(251, 133, 0, 0.9)',
+                                                        color: '#fb8500',
                                                         position: monaco.editor.OverviewRulerLane.Full
                                                     },
                                                     minimap: {
-                                                        color: 'rgba(251, 133, 0, 0.8)',
+                                                        color: '#fb8500',
                                                         position: monaco.editor.MinimapPosition.Inline
-                                                    }
+                                                    },
+                                                    glyphMarginClassName: 'modified-glyph-margin'
                                                 }
                                             });
                                             
-                                            // Add yellow background to modified side
+                                            // Add enhanced yellow decoration to modified side
                                             modifiedDecorations.push({
                                                 range: new monaco.Range(
                                                     change.modifiedStartLineNumber,
@@ -946,15 +968,16 @@
                                                 options: {
                                                     isWholeLine: true,
                                                     className: 'modified-line-decoration',
-                                                    backgroundColor: 'rgba(251, 133, 0, 0.3)',
+                                                    linesDecorationsClassName: 'modified-line-gutter',
                                                     overviewRuler: {
-                                                        color: 'rgba(251, 133, 0, 0.9)',
+                                                        color: '#fb8500',
                                                         position: monaco.editor.OverviewRulerLane.Full
                                                     },
                                                     minimap: {
-                                                        color: 'rgba(251, 133, 0, 0.8)',
+                                                        color: '#fb8500',
                                                         position: monaco.editor.MinimapPosition.Inline
-                                                    }
+                                                    },
+                                                    glyphMarginClassName: 'modified-glyph-margin'
                                                 }
                                             });
                                         }
