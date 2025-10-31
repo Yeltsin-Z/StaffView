@@ -486,8 +486,11 @@
             
             if (Object.keys(currentStructure).length === 0) {
                 sidebar.innerHTML = `
-                    <div style="padding: 20px; color: #6c757d;">
-                        No artifacts found. Please check the artifacts directory.
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📦</div>
+                        <div style="color: #667eea; font-weight: 600; margin-bottom: 10px;">No Artifacts Uploaded</div>
+                        <div style="color: #6c757d; margin-bottom: 15px;">Upload an artifact from the dashboard to begin comparing.</div>
+                        <a href="/" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Go to Dashboard</a>
                     </div>
                 `;
                 return;

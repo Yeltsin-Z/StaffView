@@ -18,9 +18,18 @@ import json
 app = Flask(__name__)
 
 # Configuration
-ARTIFACTS_DIR = Path("/Users/yeltsinz/Downloads/regression-diffs (1)")
 UPLOAD_FOLDER = Path(__file__).parent / "uploads"
 UPLOAD_FOLDER.mkdir(exist_ok=True)
+
+# Use environment variable or default to uploads/extracted
+# This makes it work on both local and deployed environments
+default_artifacts = UPLOAD_FOLDER / "extracted"
+ARTIFACTS_DIR = Path(os.getenv('ARTIFACTS_DIR', str(default_artifacts)))
+
+# If default local path exists, use it (for development)
+local_dev_path = Path("/Users/yeltsinz/Downloads/regression-diffs (1)")
+if local_dev_path.exists():
+    ARTIFACTS_DIR = local_dev_path
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
@@ -167,6 +176,10 @@ def compare_view():
 @app.route('/api/structure')
 def get_structure():
     """Get artifact directory structure"""
+    # Check if ARTIFACTS_DIR exists and has content
+    if not ARTIFACTS_DIR.exists() or not any(ARTIFACTS_DIR.iterdir()):
+        return jsonify({})
+    
     structure = get_artifact_structure(ARTIFACTS_DIR)
     return jsonify(structure)
 
