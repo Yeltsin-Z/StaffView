@@ -876,8 +876,85 @@
 
                         console.log('Monaco Diff Editor created successfully');
                         
-                        // Force layout after a short delay
+                        // Add yellow highlighting for modified lines
                         setTimeout(() => {
+                            try {
+                                const originalLines = originalContent.split('\n');
+                                const modifiedLines = modifiedContent.split('\n');
+                                
+                                // Use difflib to find modified lines
+                                const changes = diffEditor.getLineChanges() || [];
+                                
+                                const originalEditor = diffEditor.getOriginalEditor();
+                                const modifiedEditor = diffEditor.getModifiedEditor();
+                                
+                                const originalDecorations = [];
+                                const modifiedDecorations = [];
+                                
+                                // Highlight modified lines (where both sides have content but different)
+                                changes.forEach(change => {
+                                    // A change where both original and modified have lines = modification
+                                    if (change.originalEndLineNumber && change.modifiedEndLineNumber) {
+                                        const originalLineCount = change.originalEndLineNumber - change.originalStartLineNumber + 1;
+                                        const modifiedLineCount = change.modifiedEndLineNumber - change.modifiedStartLineNumber + 1;
+                                        
+                                        // If line counts match or are similar, treat as modification
+                                        if (originalLineCount > 0 && modifiedLineCount > 0) {
+                                            // Add yellow background to original side
+                                            originalDecorations.push({
+                                                range: new monaco.Range(
+                                                    change.originalStartLineNumber,
+                                                    1,
+                                                    change.originalEndLineNumber,
+                                                    1
+                                                ),
+                                                options: {
+                                                    isWholeLine: true,
+                                                    className: 'modified-line-decoration',
+                                                    backgroundColor: 'rgba(251, 133, 0, 0.15)',
+                                                    overviewRuler: {
+                                                        color: 'rgba(251, 133, 0, 0.8)',
+                                                        position: monaco.editor.OverviewRulerLane.Full
+                                                    }
+                                                }
+                                            });
+                                            
+                                            // Add yellow background to modified side
+                                            modifiedDecorations.push({
+                                                range: new monaco.Range(
+                                                    change.modifiedStartLineNumber,
+                                                    1,
+                                                    change.modifiedEndLineNumber,
+                                                    1
+                                                ),
+                                                options: {
+                                                    isWholeLine: true,
+                                                    className: 'modified-line-decoration',
+                                                    backgroundColor: 'rgba(251, 133, 0, 0.15)',
+                                                    overviewRuler: {
+                                                        color: 'rgba(251, 133, 0, 0.8)',
+                                                        position: monaco.editor.OverviewRulerLane.Full
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                                
+                                // Apply decorations
+                                if (originalDecorations.length > 0) {
+                                    originalEditor.createDecorationsCollection(originalDecorations);
+                                }
+                                if (modifiedDecorations.length > 0) {
+                                    modifiedEditor.createDecorationsCollection(modifiedDecorations);
+                                }
+                                
+                                console.log(`Applied ${originalDecorations.length} modified line decorations`);
+                            } catch (error) {
+                                console.error('Error applying modified line decorations:', error);
+                            }
+                            
+                            // Force layout
                             if (diffEditor) {
                                 diffEditor.layout();
                             }
