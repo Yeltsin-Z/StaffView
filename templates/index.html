@@ -19,7 +19,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0d1117;
+            background: white;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -33,13 +33,15 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 25px;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-            z-index: 1000;
-            position: relative;
         }
 
         .header-left {
@@ -49,166 +51,130 @@
         }
 
         .header h1 {
-            font-size: 1.5em;
+            font-size: 2em;
             font-weight: 700;
-            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            margin-top: 5px;
         }
 
         .back-button {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             text-decoration: none;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.9em;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .back-button:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.3);
             transform: translateX(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-size: 0.85em;
-            opacity: 0.95;
-        }
-
-        .header-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
         }
 
         .main-content {
             display: flex;
             flex: 1;
             overflow: hidden;
-            position: relative;
         }
 
         .sidebar {
-            width: 280px;
-            background: #161b22;
-            border-right: 1px solid #30363d;
+            width: 320px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
             overflow-y: auto;
-            color: #c9d1d9;
-            transition: transform 0.3s ease;
-            z-index: 100;
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-280px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #0d1117;
+            background: #f1f1f1;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #30363d;
-            border-radius: 4px;
+            background: #c0c0c0;
+            border-radius: 5px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #484f58;
+            background: #a0a0a0;
         }
 
         .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid #30363d;
-            background: #161b22;
+            padding: 25px;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .sidebar-header h2 {
-            font-size: 1em;
-            color: #f0f6fc;
+            font-size: 1.3em;
+            color: #333;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .sidebar-header p {
-            font-size: 0.8em;
-            color: #8b949e;
+            font-size: 0.9em;
+            color: #666;
         }
 
         .folder-group {
-            border-bottom: 1px solid #21262d;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .folder-header {
-            padding: 12px 20px;
-            background: #161b22;
+            padding: 15px 25px;
+            background: white;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: background 0.2s;
             user-select: none;
         }
 
         .folder-header:hover {
-            background: #1c2128;
+            background: #f0f0f0;
         }
 
         .folder-header.active {
-            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, transparent 100%);
-            border-left: 3px solid #667eea;
+            background: linear-gradient(90deg, #e8edff 0%, transparent 100%);
+            border-left: 4px solid #667eea;
         }
 
         .folder-name {
             font-weight: 600;
-            color: #f0f6fc;
+            color: #333;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.9em;
-        }
-
-        .folder-icon {
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
         .folder-count {
-            background: #21262d;
-            color: #8b949e;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 600;
-        }
-
-        .folder-header.active .folder-count {
-            background: rgba(102, 126, 234, 0.2);
+            background: #e8edff;
             color: #667eea;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .file-list {
             display: none;
-            background: #0d1117;
+            background: #fafafa;
         }
 
         .file-list.active {
@@ -216,168 +182,142 @@
         }
 
         .file-item {
-            padding: 10px 20px 10px 45px;
+            padding: 12px 25px 12px 50px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 0.85em;
         }
 
         .file-item:hover {
-            background: #161b22;
+            background: #f0f0f0;
         }
 
         .file-item.active {
-            background: #1c2128;
-            border-left-color: #58a6ff;
-            color: #58a6ff;
-        }
-
-        .file-icon {
-            font-size: 1em;
+            background: white;
+            border-left-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
         }
 
         .editor-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #0d1117;
+            background: #1e1e1e;
             overflow: hidden;
-            position: relative;
-        }
-
-        .sidebar-toggle {
-            position: absolute;
-            left: 280px;
-            top: 20px;
-            width: 30px;
-            height: 40px;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-left: none;
-            border-radius: 0 8px 8px 0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8b949e;
-            transition: all 0.3s ease;
-            z-index: 99;
-        }
-
-        .sidebar-toggle:hover {
-            background: #1c2128;
-            color: #f0f6fc;
-        }
-
-        .sidebar.collapsed + .sidebar-toggle {
-            left: 0;
         }
 
         .editor-header {
-            background: #161b22;
+            background: white;
             padding: 20px 30px;
-            border-bottom: 1px solid #30363d;
-            color: #c9d1d9;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .editor-title {
-            font-size: 1.3em;
+            font-size: 1.5em;
             font-weight: 700;
-            color: #f0f6fc;
-            margin-bottom: 12px;
+            color: #333;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
         .editor-subtitle {
-            font-size: 0.9em;
-            color: #8b949e;
+            font-size: 0.95em;
+            color: #666;
             display: flex;
             align-items: center;
             gap: 15px;
-            flex-wrap: wrap;
         }
 
         .branch-label {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 5px 12px;
-            background: #21262d;
-            border-radius: 6px;
-            font-size: 0.85em;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.9em;
             font-weight: 600;
-            border: 1px solid #30363d;
         }
 
         .branch-label.feat {
-            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
-            color: #fff;
-            border-color: #2ea043;
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            color: white;
         }
 
         .branch-label.main {
-            background: linear-gradient(135deg, #1f6feb 0%, #388bfd 100%);
-            color: #fff;
-            border-color: #388bfd;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: white;
         }
 
         .stats-bar {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             padding: 15px 30px;
-            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
-            border-bottom: 1px solid #30363d;
-            color: #c9d1d9;
-            font-size: 0.9em;
-            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95em;
         }
 
         .stat-item {
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 6px 14px;
-            background: #0d1117;
             border-radius: 8px;
-            border: 1px solid #21262d;
+            font-weight: 600;
         }
 
-        .stat-icon {
-            width: 10px;
-            height: 10px;
+        .stat-badge.added {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .stat-badge.removed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stat-badge.modified {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .stat-badge.unchanged {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .stat-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            box-shadow: 0 0 10px currentColor;
         }
 
-        .stat-icon.added {
-            background: #3fb950;
-            color: #3fb950;
+        .stat-badge.added .stat-dot {
+            background: #10b981;
         }
 
-        .stat-icon.removed {
-            background: #f85149;
-            color: #f85149;
+        .stat-badge.removed .stat-dot {
+            background: #ef4444;
         }
 
-        .stat-icon.modified {
-            background: #d29922;
-            color: #d29922;
+        .stat-badge.modified .stat-dot {
+            background: #f59e0b;
         }
 
-        .stat-icon.unchanged {
-            background: #8b949e;
-            color: #8b949e;
-        }
-
-        .stat-item strong {
-            color: #f0f6fc;
-            font-weight: 700;
+        .stat-badge.unchanged .stat-dot {
+            background: #6b7280;
         }
 
         .diff-container {
@@ -400,29 +340,28 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #8b949e;
+            color: #666;
             text-align: center;
             padding: 40px;
+            background: white;
         }
 
         .empty-state-icon {
-            font-size: 5em;
-            margin-bottom: 25px;
-            opacity: 0.4;
-            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
         }
 
         .empty-state h3 {
-            color: #c9d1d9;
-            margin-bottom: 12px;
-            font-size: 1.4em;
-            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.5em;
         }
 
         .empty-state p {
             max-width: 450px;
-            line-height: 1.7;
-            color: #8b949e;
+            line-height: 1.6;
+            color: #666;
         }
 
         .loading {
@@ -431,13 +370,13 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #8b949e;
+            background: white;
         }
 
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid #21262d;
+            border: 4px solid #e0e0e0;
             border-top-color: #667eea;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -449,8 +388,8 @@
         }
 
         .loading p {
+            color: #666;
             font-size: 1.1em;
-            color: #8b949e;
         }
 
         .no-artifacts {
@@ -460,124 +399,79 @@
             justify-content: center;
             padding: 80px 40px;
             text-align: center;
-            color: #8b949e;
         }
 
         .no-artifacts-icon {
-            font-size: 5em;
-            margin-bottom: 25px;
-            opacity: 0.4;
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
         }
 
         .no-artifacts h3 {
-            color: #c9d1d9;
-            font-size: 1.4em;
-            margin-bottom: 12px;
-            font-weight: 600;
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 10px;
         }
 
         .no-artifacts p {
+            color: #666;
             margin-bottom: 30px;
-            line-height: 1.7;
-            max-width: 400px;
+            line-height: 1.6;
         }
 
         .no-artifacts a {
             display: inline-block;
-            padding: 14px 28px;
+            padding: 12px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s;
         }
 
         .no-artifacts a:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
         }
 
         /* Monaco Editor overrides */
         .monaco-editor {
             padding-top: 0 !important;
         }
-
-        .monaco-editor .overflow-guard {
-            border-radius: 0 !important;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .folder-group, .file-item {
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 240px;
-            }
-            
-            .header-info {
-                display: none;
-            }
-            
-            .stats-bar {
-                gap: 15px;
-                padding: 12px 20px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="header">
-            <div class="header-left">
-                <a href="/" class="back-button">
-                    <span>←</span>
-                    <span>Dashboard</span>
-                </a>
-                <h1>⚡ StaffView</h1>
-            </div>
-            <div class="header-info">
-                <div class="header-badge" id="tenant-count">
-                    <span>📦</span>
-                    <span>Loading...</span>
+            <div class="header-content">
+                <div class="header-left">
+                    <a href="/" class="back-button">
+                        <span>←</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <div>
+                        <h1>⚡ StaffView</h1>
+                        <p>Regression artifacts comparison</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="main-content">
-            <div class="sidebar" id="sidebar-panel">
+            <div class="sidebar">
                 <div class="sidebar-header">
-                    <h2><span>🗂️</span> Artifacts</h2>
+                    <h2>📦 Artifacts</h2>
                     <p id="artifacts-count">Loading...</p>
                 </div>
                 <div id="sidebar"></div>
             </div>
 
-            <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
-                <span id="toggle-icon">‹</span>
-            </div>
-
             <div class="editor-area">
                 <div id="editor-content">
                     <div class="empty-state">
-                        <div class="empty-state-icon">✨</div>
+                        <div class="empty-state-icon">📄</div>
                         <h3>Select a file to compare</h3>
-                        <p>Choose a chart or report from the sidebar to view the differences between feature and main branches with VS Code-like precision.</p>
+                        <p>Choose a chart or report from the sidebar to view the differences between feature and main branches.</p>
                     </div>
                 </div>
             </div>
@@ -616,26 +510,9 @@
                 const response = await fetch('/api/structure');
                 currentStructure = await response.json();
                 renderSidebar();
-                updateTenantCount();
             } catch (error) {
                 console.error('Error loading structure:', error);
             }
-        }
-
-        function updateTenantCount() {
-            const tenantCount = Object.keys(currentStructure).length;
-            const totalFiles = Object.values(currentStructure).reduce((sum, files) => sum + Object.keys(files).length, 0);
-            const tenantCountEl = document.getElementById('tenant-count');
-            if (tenantCount > 0) {
-                tenantCountEl.innerHTML = `<span>📦</span><span>${tenantCount} tenants · ${totalFiles} files</span>`;
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar-panel');
-            const toggleIcon = document.getElementById('toggle-icon');
-            sidebar.classList.toggle('collapsed');
-            toggleIcon.textContent = sidebar.classList.contains('collapsed') ? '›' : '‹';
         }
 
         function renderSidebar() {
@@ -665,7 +542,7 @@
                     <div class="folder-group">
                         <div class="folder-header" onclick="toggleFolder('${folderId}')">
                             <span class="folder-name">
-                                <span class="folder-icon">📁</span>
+                                <span>📁</span>
                                 <span>Tenant ${folderId}</span>
                             </span>
                             <span class="folder-count">${fileCount}</span>
@@ -677,7 +554,7 @@
                     const icon = fileId.startsWith('CHART') ? '📊' : '📋';
                     html += `
                         <div class="file-item" onclick="selectFile('${folderId}', '${fileId}')">
-                            <span class="file-icon">${icon}</span>
+                            <span>${icon}</span>
                             <span>${fileId}</span>
                         </div>
                     `;
@@ -765,7 +642,7 @@
                 <div class="editor-subtitle">
                     <span>Tenant ${data.folder_id}</span>
                     <span class="branch-label main">⎇ main</span>
-                    <span style="color: #484f58;">vs</span>
+                    <span>↔</span>
                     <span class="branch-label feat">⎇ feat</span>
                 </div>
             `;
@@ -775,20 +652,28 @@
             statsBar.className = 'stats-bar';
             statsBar.innerHTML = `
                 <div class="stat-item">
-                    <span class="stat-icon added"></span>
-                    <span><strong>${data.stats.added}</strong> added</span>
+                    <div class="stat-badge added">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.added}</strong> added</span>
+                    </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon removed"></span>
-                    <span><strong>${data.stats.removed}</strong> removed</span>
+                    <div class="stat-badge removed">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.removed}</strong> removed</span>
+                    </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon modified"></span>
-                    <span><strong>${data.stats.modified}</strong> modified</span>
+                    <div class="stat-badge modified">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.modified}</strong> modified</span>
+                    </div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-icon unchanged"></span>
-                    <span><strong>${data.stats.unchanged}</strong> unchanged</span>
+                    <div class="stat-badge unchanged">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.unchanged}</strong> unchanged</span>
+                    </div>
                 </div>
             `;
 
@@ -816,8 +701,6 @@
                         const modifiedContent = data.feat_content || '';
 
                         console.log('Creating Monaco Diff Editor...');
-                        console.log('Original content length:', originalContent.length);
-                        console.log('Modified content length:', modifiedContent.length);
 
                         diffEditor = monaco.editor.createDiffEditor(diffContainer, {
                             theme: 'vs-dark',
@@ -859,7 +742,6 @@
                         }, 100);
                     } catch (error) {
                         console.error('Error creating Monaco editor:', error);
-                        // Fallback to simple diff view
                         renderSimpleDiff(data, diffContainer);
                     }
                 });
@@ -883,19 +765,19 @@
             container.style.display = 'flex';
             container.style.flexDirection = 'row';
             container.style.gap = '1px';
-            container.style.background = '#30363d';
+            container.style.background = '#e0e0e0';
             
             const createPanel = (lines, title) => {
                 const panel = document.createElement('div');
                 panel.style.flex = '1';
                 panel.style.overflow = 'auto';
-                panel.style.background = '#0d1117';
-                panel.style.color = '#c9d1d9';
+                panel.style.background = 'white';
+                panel.style.color = '#333';
                 panel.style.fontFamily = 'Consolas, Monaco, monospace';
                 panel.style.fontSize = '13px';
                 panel.style.padding = '10px';
                 
-                let html = `<div style="color: #8b949e; padding: 5px 0; border-bottom: 1px solid #30363d; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
+                let html = `<div style="color: #666; padding: 5px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
                 lines.forEach((line, i) => {
                     html += `<div style="padding: 2px 5px; white-space: pre;">${i+1} | ${line}</div>`;
                 });
