@@ -492,7 +492,7 @@
         /* Monaco Editor Light Theme Enhancements */
         /* Modified line custom decoration */
         .modified-line-decoration {
-            background-color: rgba(251, 133, 0, 0.08) !important;
+            background-color: rgba(251, 133, 0, 0.25) !important;
         }
         
         /* Add subtle border to diff panels */
@@ -818,13 +818,13 @@
                                 'editorLineNumber.foreground': '#8b949e',
                                 'editorLineNumber.activeForeground': '#24292e',
                                 
-                                // Added lines (green) - lighter for better readability
-                                'diffEditor.insertedTextBackground': '#dcffe440',
-                                'diffEditor.insertedLineBackground': '#dcffe420',
+                                // Added lines (green) - darker for better visibility
+                                'diffEditor.insertedTextBackground': '#acf2bd60',
+                                'diffEditor.insertedLineBackground': '#acf2bd40',
                                 
-                                // Removed lines (red) - lighter for better readability
-                                'diffEditor.removedTextBackground': '#ffe5e540',
-                                'diffEditor.removedLineBackground': '#ffe5e520',
+                                // Removed lines (red) - darker for better visibility
+                                'diffEditor.removedTextBackground': '#ffc1c1a0',
+                                'diffEditor.removedLineBackground': '#ffc1c160',
                                 
                                 // Border between panels - more visible
                                 'diffEditor.border': '#d0d7de',
@@ -923,7 +923,7 @@
                                                 options: {
                                                     isWholeLine: true,
                                                     className: 'modified-line-decoration',
-                                                    backgroundColor: 'rgba(251, 133, 0, 0.12)',
+                                                    backgroundColor: 'rgba(251, 133, 0, 0.3)',
                                                     overviewRuler: {
                                                         color: 'rgba(251, 133, 0, 0.9)',
                                                         position: monaco.editor.OverviewRulerLane.Full
@@ -946,7 +946,7 @@
                                                 options: {
                                                     isWholeLine: true,
                                                     className: 'modified-line-decoration',
-                                                    backgroundColor: 'rgba(251, 133, 0, 0.12)',
+                                                    backgroundColor: 'rgba(251, 133, 0, 0.3)',
                                                     overviewRuler: {
                                                         color: 'rgba(251, 133, 0, 0.9)',
                                                         position: monaco.editor.OverviewRulerLane.Full
