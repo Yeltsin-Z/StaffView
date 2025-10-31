@@ -1,14 +1,13 @@
 services:
   - type: web
     name: staffview
-    env: docker
+    env: python
     region: oregon
     plan: free
-    dockerfilePath: ./Dockerfile
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --config gunicorn_config.py
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: PORT
-        value: 5001
     healthCheckPath: /
 
