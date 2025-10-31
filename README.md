@@ -151,35 +151,38 @@ StaffView is production-ready! Multiple deployment options available:
 
 ### Quick Production Start
 ```bash
-# Using Gunicorn (recommended)
+# Using Gunicorn (recommended for production)
 gunicorn --config gunicorn_config.py app:app
 ```
 
-### Docker Deployment
+### AWS EC2 Deployment (Recommended ⭐)
+
+**Automated Deployment:**
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
+# On your EC2 instance, after cloning the repository:
+./deploy-ec2.sh
 ```
 
-### Deployment Options
-- **Render** - Easy deployment with free HTTPS (Recommended ⭐)
-- **AWS EC2** - Full control with systemd service
+**Update Existing Deployment:**
+```bash
+# Pull latest changes and restart
+./update-ec2.sh
+```
+
+**See [AWS_EC2_DEPLOYMENT.md](AWS_EC2_DEPLOYMENT.md) for complete guide** including:
+- Step-by-step EC2 setup
+- Nginx configuration
+- SSL/HTTPS with Let's Encrypt
+- Systemd service management
+- Security and monitoring
+- Troubleshooting
+
+### Other Deployment Options
+- **Render** - Easy deployment with free HTTPS
 - **Heroku** - Simple git push deployment
 - **Google Cloud Run** - Serverless container deployment
 - **DigitalOcean** - App Platform auto-deployment
 - **Railway** - Git-based deployment
-
-**See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide** including:
-- Cloud platform setup
-- Nginx configuration
-- SSL/HTTPS setup
-- Monitoring and maintenance
-- Security checklist
-
-### Test Deployment Readiness
-```bash
-./deploy-test.sh
-```
 
 ---
 
