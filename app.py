@@ -253,6 +253,13 @@ def use_sample():
     })
 
 
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files"""
+    static_dir = Path(__file__).parent / 'static'
+    return send_from_directory(static_dir, filename)
+
+
 if __name__ == '__main__':
     print("⚡ Starting StaffView...")
     print("   Gandalf's tool for regression clarity")
