@@ -430,12 +430,19 @@
         let currentStructure = {};
         let diffEditor = null;
         let selectedFile = null;
+        let monacoLoaded = false;
 
         // Configure Monaco Editor
         require.config({ 
             paths: { 
                 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' 
             }
+        });
+
+        // Pre-load Monaco Editor
+        require(['vs/editor/editor.main'], function() {
+            console.log('Monaco Editor loaded successfully');
+            monacoLoaded = true;
         });
 
         // Load structure on page load
@@ -618,42 +625,79 @@
             editorContent.appendChild(diffContainer);
 
             // Initialize Monaco Diff Editor
-            require(['vs/editor/editor.main'], function() {
-                // Dispose previous editor if exists
-                if (diffEditor) {
-                    diffEditor.dispose();
-                }
+            const initEditor = () => {
+                require(['vs/editor/editor.main'], function() {
+                    try {
+                        // Dispose previous editor if exists
+                        if (diffEditor) {
+                            diffEditor.dispose();
+                            diffEditor = null;
+                        }
 
-                const originalContent = data.main_content || '';
-                const modifiedContent = data.feat_content || '';
+                        const originalContent = data.main_content || '';
+                        const modifiedContent = data.feat_content || '';
 
-                diffEditor = monaco.editor.createDiffEditor(diffContainer, {
-                    theme: 'vs-dark',
-                    automaticLayout: true,
-                    readOnly: true,
-                    renderSideBySide: true,
-                    enableSplitViewResizing: true,
-                    scrollBeyondLastLine: false,
-                    minimap: {
-                        enabled: true
-                    },
-                    fontSize: 13,
-                    lineNumbers: 'on',
-                    renderWhitespace: 'selection',
-                    scrollbar: {
-                        vertical: 'auto',
-                        horizontal: 'auto',
-                        useShadows: true,
-                        verticalScrollbarSize: 10,
-                        horizontalScrollbarSize: 10
+                        console.log('Creating Monaco Diff Editor...');
+                        console.log('Original content length:', originalContent.length);
+                        console.log('Modified content length:', modifiedContent.length);
+
+                        diffEditor = monaco.editor.createDiffEditor(diffContainer, {
+                            theme: 'vs-dark',
+                            automaticLayout: true,
+                            readOnly: true,
+                            renderSideBySide: true,
+                            enableSplitViewResizing: true,
+                            scrollBeyondLastLine: false,
+                            minimap: {
+                                enabled: true
+                            },
+                            fontSize: 13,
+                            lineNumbers: 'on',
+                            renderWhitespace: 'selection',
+                            scrollbar: {
+                                vertical: 'auto',
+                                horizontal: 'auto',
+                                useShadows: true,
+                                verticalScrollbarSize: 10,
+                                horizontalScrollbarSize: 10
+                            }
+                        });
+
+                        const originalModel = monaco.editor.createModel(originalContent, 'text/plain');
+                        const modifiedModel = monaco.editor.createModel(modifiedContent, 'text/plain');
+
+                        diffEditor.setModel({
+                            original: originalModel,
+                            modified: modifiedModel
+                        });
+
+                        console.log('Monaco Diff Editor created successfully');
+                        
+                        // Force layout after a short delay
+                        setTimeout(() => {
+                            if (diffEditor) {
+                                diffEditor.layout();
+                            }
+                        }, 100);
+                    } catch (error) {
+                        console.error('Error creating Monaco editor:', error);
+                        editorContent.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">⚠️</div>
+                                <h3>Error Initializing Editor</h3>
+                                <p>${error.message}</p>
+                            </div>
+                        `;
                     }
                 });
+            };
 
-                diffEditor.setModel({
-                    original: monaco.editor.createModel(originalContent, 'plaintext'),
-                    modified: monaco.editor.createModel(modifiedContent, 'plaintext')
-                });
-            });
+            // Wait a bit for Monaco to be ready if needed
+            if (typeof monaco === 'undefined') {
+                setTimeout(initEditor, 500);
+            } else {
+                initEditor();
+            }
         }
 
         // Handle window resize
