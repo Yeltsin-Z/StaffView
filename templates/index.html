@@ -689,23 +689,54 @@
                         }, 100);
                     } catch (error) {
                         console.error('Error creating Monaco editor:', error);
-                        editorContent.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">⚠️</div>
-                                <h3>Error Initializing Editor</h3>
-                                <p>${error.message}</p>
-                            </div>
-                        `;
+                        // Fallback to simple diff view
+                        renderSimpleDiff(data, diffContainer);
                     }
                 });
             };
 
             // Wait a bit for Monaco to be ready if needed
             if (typeof monaco === 'undefined') {
+                console.log('Monaco not loaded yet, waiting...');
                 setTimeout(initEditor, 500);
             } else {
                 initEditor();
             }
+        }
+        
+        // Fallback simple diff view
+        function renderSimpleDiff(data, container) {
+            console.log('Using simple diff fallback');
+            const mainLines = data.main_content.split('\n');
+            const featLines = data.feat_content.split('\n');
+            
+            container.style.display = 'flex';
+            container.style.flexDirection = 'row';
+            container.style.gap = '1px';
+            container.style.background = '#3e3e42';
+            
+            const createPanel = (lines, title) => {
+                const panel = document.createElement('div');
+                panel.style.flex = '1';
+                panel.style.overflow = 'auto';
+                panel.style.background = '#1e1e1e';
+                panel.style.color = '#d4d4d4';
+                panel.style.fontFamily = 'Consolas, Monaco, monospace';
+                panel.style.fontSize = '13px';
+                panel.style.padding = '10px';
+                
+                let html = `<div style="color: #858585; padding: 5px 0; border-bottom: 1px solid #3e3e42; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
+                lines.forEach((line, i) => {
+                    html += `<div style="padding: 2px 5px; white-space: pre;">${i+1} | ${line}</div>`;
+                });
+                panel.innerHTML = html;
+                return panel;
+            };
+            
+            container.innerHTML = '';
+            container.appendChild(createPanel(mainLines, 'main'));
+            container.appendChild(createPanel(featLines, 'feat'));
+        }
         }
 
         // Handle window resize
