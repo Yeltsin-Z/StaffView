@@ -488,6 +488,63 @@
             padding-top: 0 !important;
         }
 
+        /* Monaco Editor Diff Color Customization */
+        /* Lines added in feat (green) */
+        .monaco-diff-editor .insert-sign,
+        .monaco-diff-editor .line-insert {
+            background-color: rgba(46, 164, 79, 0.2) !important;
+        }
+        
+        .monaco-diff-editor .char-insert {
+            background-color: rgba(46, 164, 79, 0.4) !important;
+        }
+
+        /* Lines removed from main (red) */
+        .monaco-diff-editor .delete-sign,
+        .monaco-diff-editor .line-delete {
+            background-color: rgba(207, 34, 46, 0.2) !important;
+        }
+        
+        .monaco-diff-editor .char-delete {
+            background-color: rgba(207, 34, 46, 0.4) !important;
+        }
+
+        /* Lines modified (orange/yellow) */
+        .monaco-diff-editor .line-insert.char-insert,
+        .monaco-diff-editor .line-delete.char-delete {
+            background-color: rgba(251, 133, 0, 0.15) !important;
+        }
+
+        /* Gutter (line numbers area) colors */
+        .monaco-diff-editor .margin .insert-sign {
+            background-color: rgba(46, 164, 79, 0.3) !important;
+        }
+
+        .monaco-diff-editor .margin .delete-sign {
+            background-color: rgba(207, 34, 46, 0.3) !important;
+        }
+
+        /* Side-by-side diff specific colors */
+        .monaco-diff-editor .diffViewport {
+            background-color: rgba(102, 126, 234, 0.1) !important;
+        }
+
+        /* Inline diff colors for changed characters */
+        .monaco-editor .line-insert .char-insert,
+        .monaco-editor .inline-added-margin-view-zone {
+            background-color: rgba(46, 164, 79, 0.3) !important;
+        }
+
+        .monaco-editor .line-delete .char-delete,
+        .monaco-editor .inline-deleted-margin-view-zone {
+            background-color: rgba(207, 34, 46, 0.3) !important;
+        }
+
+        /* Selection highlight colors */
+        .monaco-diff-editor .diffViewport .diffViewportOverlay {
+            background-color: rgba(102, 126, 234, 0.2) !important;
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from {
