@@ -19,7 +19,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #1e1e1e;
+            background: #0d1117;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -33,12 +33,13 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 12px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
             z-index: 1000;
+            position: relative;
         }
 
         .header-left {
@@ -48,8 +49,9 @@
         }
 
         .header h1 {
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .back-button {
@@ -57,110 +59,156 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             color: white;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.9em;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             transform: translateX(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.85em;
+            opacity: 0.95;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
         }
 
         .main-content {
             display: flex;
             flex: 1;
             overflow: hidden;
+            position: relative;
         }
 
         .sidebar {
-            width: 300px;
-            background: #252526;
-            border-right: 1px solid #3e3e42;
+            width: 280px;
+            background: #161b22;
+            border-right: 1px solid #30363d;
             overflow-y: auto;
-            color: #cccccc;
+            color: #c9d1d9;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-280px);
         }
 
         .sidebar::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #1e1e1e;
+            background: #0d1117;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #424242;
-            border-radius: 5px;
+            background: #30363d;
+            border-radius: 4px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #4e4e4e;
+            background: #484f58;
         }
 
         .sidebar-header {
             padding: 20px;
-            border-bottom: 1px solid #3e3e42;
-            background: #2d2d30;
+            border-bottom: 1px solid #30363d;
+            background: #161b22;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .sidebar-header h2 {
-            font-size: 1.1em;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-
-        .sidebar-header p {
-            font-size: 0.85em;
-            color: #858585;
-        }
-
-        .folder-group {
-            border-bottom: 1px solid #3e3e42;
-        }
-
-        .folder-header {
-            padding: 12px 20px;
-            background: #2d2d30;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-            user-select: none;
-        }
-
-        .folder-header:hover {
-            background: #37373d;
-        }
-
-        .folder-header.active {
-            background: #094771;
-        }
-
-        .folder-name {
-            font-weight: 600;
-            color: #fff;
+            font-size: 1em;
+            color: #f0f6fc;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
+        .sidebar-header p {
+            font-size: 0.8em;
+            color: #8b949e;
+        }
+
+        .folder-group {
+            border-bottom: 1px solid #21262d;
+        }
+
+        .folder-header {
+            padding: 12px 20px;
+            background: #161b22;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .folder-header:hover {
+            background: #1c2128;
+        }
+
+        .folder-header.active {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, transparent 100%);
+            border-left: 3px solid #667eea;
+        }
+
+        .folder-name {
+            font-weight: 600;
+            color: #f0f6fc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .folder-icon {
+            font-size: 1.1em;
+        }
+
         .folder-count {
-            background: #3e3e42;
-            color: #cccccc;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.85em;
+            background: #21262d;
+            color: #8b949e;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .folder-header.active .folder-count {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
         }
 
         .file-list {
             display: none;
-            background: #1e1e1e;
+            background: #0d1117;
         }
 
         .file-list.active {
@@ -168,118 +216,168 @@
         }
 
         .file-item {
-            padding: 10px 20px 10px 40px;
+            padding: 10px 20px 10px 45px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
             border-left: 3px solid transparent;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-size: 0.85em;
         }
 
         .file-item:hover {
-            background: #2a2d2e;
+            background: #161b22;
         }
 
         .file-item.active {
-            background: #37373d;
-            border-left-color: #007acc;
-            color: #fff;
+            background: #1c2128;
+            border-left-color: #58a6ff;
+            color: #58a6ff;
         }
 
         .file-icon {
-            font-size: 0.9em;
+            font-size: 1em;
         }
 
         .editor-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #1e1e1e;
+            background: #0d1117;
             overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            left: 280px;
+            top: 20px;
+            width: 30px;
+            height: 40px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .sidebar-toggle:hover {
+            background: #1c2128;
+            color: #f0f6fc;
+        }
+
+        .sidebar.collapsed + .sidebar-toggle {
+            left: 0;
         }
 
         .editor-header {
-            background: #2d2d30;
-            padding: 15px 25px;
-            border-bottom: 1px solid #3e3e42;
-            color: #cccccc;
+            background: #161b22;
+            padding: 20px 30px;
+            border-bottom: 1px solid #30363d;
+            color: #c9d1d9;
         }
 
         .editor-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #f0f6fc;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .editor-subtitle {
             font-size: 0.9em;
-            color: #858585;
+            color: #8b949e;
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .branch-label {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            background: #3e3e42;
-            border-radius: 4px;
+            gap: 6px;
+            padding: 5px 12px;
+            background: #21262d;
+            border-radius: 6px;
             font-size: 0.85em;
+            font-weight: 600;
+            border: 1px solid #30363d;
         }
 
         .branch-label.feat {
-            background: #1a7f37;
+            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
             color: #fff;
+            border-color: #2ea043;
         }
 
         .branch-label.main {
-            background: #0969da;
+            background: linear-gradient(135deg, #1f6feb 0%, #388bfd 100%);
             color: #fff;
+            border-color: #388bfd;
         }
 
         .stats-bar {
             display: flex;
-            gap: 20px;
-            padding: 12px 25px;
-            background: #252526;
-            border-bottom: 1px solid #3e3e42;
-            color: #cccccc;
+            gap: 25px;
+            padding: 15px 30px;
+            background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+            border-bottom: 1px solid #30363d;
+            color: #c9d1d9;
             font-size: 0.9em;
+            flex-wrap: wrap;
         }
 
         .stat-item {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 6px 14px;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #21262d;
         }
 
         .stat-icon {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
         }
 
         .stat-icon.added {
             background: #3fb950;
+            color: #3fb950;
         }
 
         .stat-icon.removed {
             background: #f85149;
+            color: #f85149;
         }
 
         .stat-icon.modified {
             background: #d29922;
+            color: #d29922;
         }
 
         .stat-icon.unchanged {
             background: #8b949e;
+            color: #8b949e;
+        }
+
+        .stat-item strong {
+            color: #f0f6fc;
+            font-weight: 700;
         }
 
         .diff-container {
@@ -302,26 +400,29 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #858585;
+            color: #8b949e;
             text-align: center;
             padding: 40px;
         }
 
         .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 5em;
+            margin-bottom: 25px;
+            opacity: 0.4;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
         }
 
         .empty-state h3 {
-            color: #cccccc;
-            margin-bottom: 10px;
-            font-size: 1.3em;
+            color: #c9d1d9;
+            margin-bottom: 12px;
+            font-size: 1.4em;
+            font-weight: 600;
         }
 
         .empty-state p {
-            max-width: 400px;
-            line-height: 1.6;
+            max-width: 450px;
+            line-height: 1.7;
+            color: #8b949e;
         }
 
         .loading {
@@ -330,21 +431,26 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #858585;
+            color: #8b949e;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #3e3e42;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #21262d;
             border-top-color: #667eea;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            font-size: 1.1em;
+            color: #8b949e;
         }
 
         .no-artifacts {
@@ -352,49 +458,86 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 60px 40px;
+            padding: 80px 40px;
             text-align: center;
-            color: #858585;
+            color: #8b949e;
         }
 
         .no-artifacts-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
+            font-size: 5em;
+            margin-bottom: 25px;
+            opacity: 0.4;
         }
 
         .no-artifacts h3 {
-            color: #cccccc;
-            font-size: 1.3em;
-            margin-bottom: 10px;
+            color: #c9d1d9;
+            font-size: 1.4em;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .no-artifacts p {
-            margin-bottom: 25px;
-            line-height: 1.6;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            max-width: 400px;
         }
 
         .no-artifacts a {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 14px 28px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
         }
 
         .no-artifacts a:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
         }
 
-        /* Monaco Editor overrides for better integration */
+        /* Monaco Editor overrides */
         .monaco-editor {
             padding-top: 0 !important;
         }
 
         .monaco-editor .overflow-guard {
             border-radius: 0 !important;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .folder-group, .file-item {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .header-info {
+                display: none;
+            }
+            
+            .stats-bar {
+                gap: 15px;
+                padding: 12px 20px;
+            }
         }
     </style>
 </head>
@@ -408,23 +551,33 @@
                 </a>
                 <h1>⚡ StaffView</h1>
             </div>
+            <div class="header-info">
+                <div class="header-badge" id="tenant-count">
+                    <span>📦</span>
+                    <span>Loading...</span>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
-            <div class="sidebar">
+            <div class="sidebar" id="sidebar-panel">
                 <div class="sidebar-header">
-                    <h2>Artifacts</h2>
+                    <h2><span>🗂️</span> Artifacts</h2>
                     <p id="artifacts-count">Loading...</p>
                 </div>
                 <div id="sidebar"></div>
             </div>
 
+            <div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+                <span id="toggle-icon">‹</span>
+            </div>
+
             <div class="editor-area">
                 <div id="editor-content">
                     <div class="empty-state">
-                        <div class="empty-state-icon">📄</div>
+                        <div class="empty-state-icon">✨</div>
                         <h3>Select a file to compare</h3>
-                        <p>Choose a chart or report from the sidebar to view the differences between feature and main branches.</p>
+                        <p>Choose a chart or report from the sidebar to view the differences between feature and main branches with VS Code-like precision.</p>
                     </div>
                 </div>
             </div>
@@ -463,9 +616,26 @@
                 const response = await fetch('/api/structure');
                 currentStructure = await response.json();
                 renderSidebar();
+                updateTenantCount();
             } catch (error) {
                 console.error('Error loading structure:', error);
             }
+        }
+
+        function updateTenantCount() {
+            const tenantCount = Object.keys(currentStructure).length;
+            const totalFiles = Object.values(currentStructure).reduce((sum, files) => sum + Object.keys(files).length, 0);
+            const tenantCountEl = document.getElementById('tenant-count');
+            if (tenantCount > 0) {
+                tenantCountEl.innerHTML = `<span>📦</span><span>${tenantCount} tenants · ${totalFiles} files</span>`;
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-panel');
+            const toggleIcon = document.getElementById('toggle-icon');
+            sidebar.classList.toggle('collapsed');
+            toggleIcon.textContent = sidebar.classList.contains('collapsed') ? '›' : '‹';
         }
 
         function renderSidebar() {
@@ -486,7 +656,7 @@
             }
 
             const totalFiles = Object.values(currentStructure).reduce((sum, files) => sum + Object.keys(files).length, 0);
-            artifactsCount.textContent = `${Object.keys(currentStructure).length} tenants, ${totalFiles} comparisons`;
+            artifactsCount.textContent = `${Object.keys(currentStructure).length} tenants · ${totalFiles} comparisons`;
 
             let html = '';
             for (const [folderId, fileGroups] of Object.entries(currentStructure)) {
@@ -495,7 +665,7 @@
                     <div class="folder-group">
                         <div class="folder-header" onclick="toggleFolder('${folderId}')">
                             <span class="folder-name">
-                                <span>📁</span>
+                                <span class="folder-icon">📁</span>
                                 <span>Tenant ${folderId}</span>
                             </span>
                             <span class="folder-count">${fileCount}</span>
@@ -527,7 +697,7 @@
                 toggleFolder(firstFolder);
                 const firstFile = Object.keys(currentStructure[firstFolder])[0];
                 if (firstFile) {
-                    selectFile(firstFolder, firstFile);
+                    setTimeout(() => selectFile(firstFolder, firstFile), 100);
                 }
             }
         }
@@ -595,7 +765,7 @@
                 <div class="editor-subtitle">
                     <span>Tenant ${data.folder_id}</span>
                     <span class="branch-label main">⎇ main</span>
-                    <span>↔</span>
+                    <span style="color: #484f58;">vs</span>
                     <span class="branch-label feat">⎇ feat</span>
                 </div>
             `;
@@ -713,19 +883,19 @@
             container.style.display = 'flex';
             container.style.flexDirection = 'row';
             container.style.gap = '1px';
-            container.style.background = '#3e3e42';
+            container.style.background = '#30363d';
             
             const createPanel = (lines, title) => {
                 const panel = document.createElement('div');
                 panel.style.flex = '1';
                 panel.style.overflow = 'auto';
-                panel.style.background = '#1e1e1e';
-                panel.style.color = '#d4d4d4';
+                panel.style.background = '#0d1117';
+                panel.style.color = '#c9d1d9';
                 panel.style.fontFamily = 'Consolas, Monaco, monospace';
                 panel.style.fontSize = '13px';
                 panel.style.padding = '10px';
                 
-                let html = `<div style="color: #858585; padding: 5px 0; border-bottom: 1px solid #3e3e42; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
+                let html = `<div style="color: #8b949e; padding: 5px 0; border-bottom: 1px solid #30363d; margin-bottom: 10px; font-weight: 600;">${title}</div>`;
                 lines.forEach((line, i) => {
                     html += `<div style="padding: 2px 5px; white-space: pre;">${i+1} | ${line}</div>`;
                 });
