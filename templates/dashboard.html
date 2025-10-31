@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaffView - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: white;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dashboard-container {
+            max-width: 100%;
+            width: 100%;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 40px;
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .dashboard-header p {
+            font-size: 1em;
+            opacity: 0.95;
+            margin-bottom: 3px;
+        }
+
+        .dashboard-content {
+            padding: 30px 80px 20px 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-content {
+                padding: 30px 40px 20px 40px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-content {
+                padding: 20px 20px 20px 20px;
+            }
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: #5568d3;
+            background: #e7f3ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+            border-style: solid;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .upload-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .browse-button {
+            padding: 12px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            margin-top: 8px;
+        }
+
+        .browse-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .browse-button:active {
+            transform: translateY(0);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .error-message {
+            display: none;
+            padding: 20px;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            color: #721c24;
+            margin-top: 20px;
+        }
+
+        .success-message {
+            display: none;
+            padding: 20px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            color: #155724;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            padding: 15px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        .feature {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>⚡ StaffView</h1>
+            <p>Gandalf's tool for regression clarity</p>
+            <p style="font-size: 0.9em; opacity: 0.8;">Compare, analyze, and illuminate test differences</p>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="welcome-section">
+                <h2>Welcome! 👋</h2>
+                <p>Upload your GitHub Actions artifact ZIP file to begin comparing regression test results between your feature branch and main branch.</p>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-title">Side-by-Side</div>
+                    <div class="feature-desc">Compare main vs feature branches</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-title">Visual Diffs</div>
+                    <div class="feature-desc">Color-coded highlighting</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Statistics</div>
+                    <div class="feature-desc">Instant change summary</div>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📦</div>
+                    <div class="upload-text">Drop your artifact ZIP file here</div>
+                    <div class="upload-subtext">or</div>
+                    <button class="browse-button" id="browseBtn">
+                        📁 Browse Files
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" accept=".zip">
+                </div>
+            </div>
+
+
+            <div class="progress-section" id="progressSection">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing artifact...</div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">✅</div>
+                <div style="font-size: 1.3em; margin-bottom: 10px;">Success!</div>
+                <div id="successText">Redirecting to comparison view...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const successText = document.getElementById('successText');
+
+        // Click upload area to browse
+        uploadArea.addEventListener('click', (e) => {
+            // Don't trigger if clicking the button
+            if (e.target !== browseBtn && !browseBtn.contains(e.target)) {
+                fileInput.click();
+            }
+        });
+
+        // Browse button click
+        browseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                uploadFile(file);
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                uploadFile(file);
+            } else {
+                showError('Please drop a ZIP file');
+            }
+        });
+
+        // Upload file
+        async function uploadFile(file) {
+            showProgress('Uploading and extracting artifact...');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(`Uploaded successfully! Found ${data.artifact_count} tenant(s)`, data);
+                } else {
+                    showError(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                showError('Upload error: ' + error.message);
+            }
+        }
+
+        function showProgress(text) {
+            progressText.textContent = text;
+            progressSection.style.display = 'block';
+            progressBar.style.width = '100%';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            uploadArea.style.opacity = '0.5';
+            uploadArea.style.pointerEvents = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.style.display = 'block';
+            progressSection.style.display = 'none';
+            successMessage.style.display = 'none';
+            uploadArea.style.opacity = '1';
+            uploadArea.style.pointerEvents = 'auto';
+        }
+
+        function showSuccess(message, data) {
+            successText.textContent = message;
+            successMessage.style.display = 'block';
+            progressSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/compare';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+

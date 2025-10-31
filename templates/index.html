@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaffView - Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: white;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateX(-3px);
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 200px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .folder-group {
+            margin-bottom: 20px;
+        }
+
+        .folder-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .folder-header:hover {
+            background: #5568d3;
+            transform: translateX(3px);
+        }
+
+        .folder-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .file-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid #e9ecef;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .file-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .file-name {
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .comparison-view {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-same { color: #28a745; }
+        .stat-modified { color: #ffc107; }
+        .stat-added { color: #17a2b8; }
+        .stat-removed { color: #dc3545; }
+
+        .comparison-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 30px;
+        }
+
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: #343a40;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr;
+            gap: 15px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .comparison-row:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-row.same {
+            background: #f8f9fa;
+        }
+
+        .comparison-row.modified {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .comparison-row.added {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .comparison-row.removed {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .line-number {
+            color: #6c757d;
+            text-align: right;
+            user-select: none;
+            font-weight: 600;
+        }
+
+        .line-content {
+            padding: 5px 10px;
+            background: white;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .comparison-row.modified .line-content {
+            background: white;
+        }
+
+        .cell-diff {
+            display: inline;
+        }
+
+        .cell-diff.different {
+            background: #ffc107;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-subtext {
+            font-size: 1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            padding: 15px 30px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-1px);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-same { 
+            background: #f8f9fa; 
+            border: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+        .legend-same .legend-dot { background: #adb5bd; }
+        
+        .legend-modified { 
+            background: #fff8e1; 
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+        .legend-modified .legend-dot { background: #ffc107; }
+        
+        .legend-added { 
+            background: #e7f3ff; 
+            border: 1px solid #17a2b8;
+            color: #0c5460;
+        }
+        .legend-added .legend-dot { background: #17a2b8; }
+        
+        .legend-removed { 
+            background: #ffe7e7; 
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+        .legend-removed .legend-dot { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header" style="position: relative;">
+            <a href="/" class="back-button">← Dashboard</a>
+            <h1>⚡ StaffView</h1>
+            <p>Illuminating regression differences with wizard-like clarity</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar" id="sidebar">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading artifacts...
+                </div>
+            </div>
+
+            <div class="comparison-view">
+            <div class="legend">
+                <div class="legend-item legend-same">
+                    <div class="legend-dot"></div>
+                    <span>Unchanged</span>
+                </div>
+                <div class="legend-item legend-modified">
+                    <div class="legend-dot"></div>
+                    <span>Modified</span>
+                </div>
+                <div class="legend-item legend-added">
+                    <div class="legend-dot"></div>
+                    <span>Added in Feat</span>
+                </div>
+                <div class="legend-item legend-removed">
+                    <div class="legend-dot"></div>
+                    <span>Removed in Feat</span>
+                </div>
+            </div>
+
+                <div class="stats-bar" id="statsBar" style="display: none;">
+                    <div class="stat-item">
+                        <div class="stat-number stat-same" id="statSame">0</div>
+                        <div class="stat-label">Unchanged</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number stat-modified" id="statModified">0</div>
+                        <div class="stat-label">Modified</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number stat-added" id="statAdded">0</div>
+                        <div class="stat-label">Added</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number stat-removed" id="statRemoved">0</div>
+                        <div class="stat-label">Removed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Total Lines</div>
+                    </div>
+                </div>
+
+                <div class="comparison-content" id="comparisonContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div class="empty-state-text">Select a file to compare</div>
+                        <div class="empty-state-subtext">Choose a file from the sidebar to see the differences</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStructure = {};
+
+        // Load artifact structure
+        async function loadStructure() {
+            try {
+                const response = await fetch('/api/structure');
+                currentStructure = await response.json();
+                renderSidebar();
+            } catch (error) {
+                document.getElementById('sidebar').innerHTML = `
+                    <div style="padding: 20px; color: #dc3545;">
+                        <strong>Error loading artifacts</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Render sidebar with folder structure
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            
+            if (Object.keys(currentStructure).length === 0) {
+                sidebar.innerHTML = `
+                    <div style="padding: 20px; color: #6c757d;">
+                        No artifacts found. Please check the artifacts directory.
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            for (const [folderId, fileGroups] of Object.entries(currentStructure)) {
+                const fileCount = Object.keys(fileGroups).length;
+                html += `
+                    <div class="folder-group">
+                        <div class="folder-header">
+                            <span>📁 Tenant ${folderId}</span>
+                            <span class="folder-badge">${fileCount}</span>
+                        </div>
+                `;
+                
+                for (const [baseId, files] of Object.entries(fileGroups)) {
+                    html += `
+                        <div class="file-item" onclick="compareFiles('${folderId}', '${baseId}')">
+                            <span class="file-name">${baseId}</span>
+                            <span>→</span>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+            }
+
+            sidebar.innerHTML = html;
+        }
+
+        // Compare files
+        async function compareFiles(folder, baseId) {
+            // Highlight active item
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.file-item').classList.add('active');
+
+            // Show loading
+            const content = document.getElementById('comparisonContent');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div>Loading comparison...</div>';
+
+            try {
+                const response = await fetch(`/api/compare?folder=${folder}&id=${baseId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                renderComparison(data);
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div class="empty-state-text">Error loading comparison</div>
+                        <div class="empty-state-subtext">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Render comparison view
+        function renderComparison(data) {
+            const { comparison, stats, folder, base_id } = data;
+
+            // Update stats
+            document.getElementById('statsBar').style.display = 'flex';
+            document.getElementById('statSame').textContent = stats.same;
+            document.getElementById('statModified').textContent = stats.modified;
+            document.getElementById('statAdded').textContent = stats.added;
+            document.getElementById('statRemoved').textContent = stats.removed;
+            document.getElementById('statTotal').textContent = stats.total_lines;
+
+            // Render comparison
+            let html = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <strong>Comparing:</strong> ${base_id} in Tenant ${folder}
+                </div>
+                <div class="comparison-header">
+                    <div>Line</div>
+                    <div>Main Branch</div>
+                    <div>Feature Branch</div>
+                </div>
+            `;
+
+            comparison.forEach(row => {
+                let mainContent = row.main || '<em style="color: #6c757d;">— empty —</em>';
+                let featContent = row.feat || '<em style="color: #6c757d;">— empty —</em>';
+
+                // Highlight cell-level differences for modified rows
+                if (row.status === 'modified' && row.cell_diffs.length > 0) {
+                    mainContent = row.cell_diffs.map(cell => 
+                        `<span class="cell-diff ${cell.different ? 'different' : ''}">${cell.main || ''}</span>`
+                    ).join(',');
+                    
+                    featContent = row.cell_diffs.map(cell => 
+                        `<span class="cell-diff ${cell.different ? 'different' : ''}">${cell.feat || ''}</span>`
+                    ).join(',');
+                }
+
+                html += `
+                    <div class="comparison-row ${row.status}">
+                        <div class="line-number">${row.line_num}</div>
+                        <div class="line-content">${mainContent}</div>
+                        <div class="line-content">${featContent}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('comparisonContent').innerHTML = html;
+        }
+
+        // Initialize
+        loadStructure();
+    </script>
+</body>
+</html>
+
