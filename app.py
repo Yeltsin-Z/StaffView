@@ -9,13 +9,16 @@ import os
 import zipfile
 import shutil
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, session, redirect, url_for, flash
 import csv
 from io import StringIO
 from difflib import unified_diff, SequenceMatcher
 import json
+from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'staffview-secret-key-change-in-production')
 
 # Configuration
 UPLOAD_FOLDER = Path(__file__).parent / "uploads"
@@ -33,6 +36,22 @@ if local_dev_path.exists():
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
+
+# Simple user storage (in production, use a database)
+# Password is hashed using werkzeug.security
+USERS = {
+    'admin': generate_password_hash('admin123'),  # Default: admin/admin123
+    'user': generate_password_hash('user123'),    # Default: user/user123
+}
+
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def extract_artifact(zip_path, extract_to):
@@ -218,19 +237,54 @@ def compare_files(feat_path, main_path):
     }
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        remember = request.form.get('remember')
+        
+        # Check credentials
+        if username in USERS and check_password_hash(USERS[username], password):
+            session['logged_in'] = True
+            session['username'] = username
+            
+            # Remember me for 30 days
+            if remember:
+                session.permanent = True
+                app.permanent_session_lifetime = 30 * 24 * 60 * 60  # 30 days
+            
+            return redirect(url_for('index'))
+        else:
+            return redirect(url_for('login', error='1'))
+    
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    """Logout user"""
+    session.clear()
+    return redirect(url_for('login'))
+
+
 @app.route('/')
+@login_required
 def index():
     """Dashboard landing page"""
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session.get('username'))
 
 
 @app.route('/compare')
+@login_required
 def compare_view():
     """Comparison interface"""
-    return render_template('index.html')
+    return render_template('index.html', username=session.get('username'))
 
 
 @app.route('/api/structure')
+@login_required
 def get_structure():
     """Get artifact directory structure"""
     # Check if ARTIFACTS_DIR exists and has content
@@ -242,6 +296,7 @@ def get_structure():
 
 
 @app.route('/api/compare')
+@login_required
 def compare():
     """Compare two files and return full contents for Monaco Editor"""
     folder = request.args.get('folder')
@@ -278,6 +333,7 @@ def compare():
 
 
 @app.route('/api/upload', methods=['POST'])
+@login_required
 def upload_artifact():
     """Upload and extract artifact zip file"""
     if 'file' not in request.files:
