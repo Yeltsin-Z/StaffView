@@ -38,6 +38,26 @@
             z-index: 1000;
             position: relative;
         }
+        
+        .logout-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(2px);
+        }
 
         .header-content {
             max-width: 1400px;
@@ -87,8 +107,9 @@
         }
 
         .header-right {
-            width: 150px;
-            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .main-content {
@@ -573,7 +594,12 @@
                     <h1>⚡ StaffView</h1>
                     <p class="header-tagline">Regression artifacts comparison</p>
                 </div>
-                <div class="header-right"></div>
+                <div class="header-right">
+                    <a href="/logout" class="logout-button">
+                        <span>🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
             </div>
         </div>
 

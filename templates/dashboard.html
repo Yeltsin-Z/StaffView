@@ -36,6 +36,31 @@
             color: white;
             padding: 25px 40px;
             text-align: center;
+            position: relative;
+        }
+        
+        .logout-button {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) translateX(2px);
         }
 
         .dashboard-header h1 {
@@ -278,6 +303,10 @@
             <h1>⚡ StaffView</h1>
             <p>Gandalf's tool for regression clarity</p>
             <p style="font-size: 0.9em; opacity: 0.8;">Compare, analyze, and illuminate test differences</p>
+            <a href="/logout" class="logout-button">
+                <span>🚪</span>
+                <span>Logout</span>
+            </a>
         </div>
 
         <div class="dashboard-content">
