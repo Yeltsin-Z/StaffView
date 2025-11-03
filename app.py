@@ -40,8 +40,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 # Simple user storage (in production, use a database)
 # Password is hashed using werkzeug.security
 USERS = {
-    'admin': generate_password_hash('admin123'),  # Default: admin/admin123
-    'user': generate_password_hash('user123'),    # Default: user/user123
+    'sdet-team@drivetrain.ai': generate_password_hash('OneRing2RuleThemAll'),
 }
 
 # Login required decorator
