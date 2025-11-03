@@ -242,17 +242,11 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        remember = request.form.get('remember')
         
         # Check credentials
         if username in USERS and check_password_hash(USERS[username], password):
             session['logged_in'] = True
             session['username'] = username
-            
-            # Remember me for 30 days
-            if remember:
-                session.permanent = True
-                app.permanent_session_lifetime = 30 * 24 * 60 * 60  # 30 days
             
             return redirect(url_for('index'))
         else:
