@@ -386,6 +386,16 @@ def use_sample():
     })
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring and keep-alive"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'StaffView',
+        'version': '1.0'
+    }), 200
+
+
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files"""
