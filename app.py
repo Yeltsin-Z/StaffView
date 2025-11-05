@@ -746,8 +746,8 @@ def create_linear_issue():
                     with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
                         # Add only the specific main and feat files
                         for branch, file_path in files_to_add:
-                            # Use structure: tenant_folder/branch/filename.csv
-                            arcname = f"{folder_id}/{branch}/{file_id}.csv"
+                            # Use structure: tenant_folder/filename-branch (no extension, matching the original format)
+                            arcname = f"{folder_id}/{file_id}-{branch}"
                             zipf.write(file_path, arcname)
                             print(f"  ✅ Added to ZIP: {arcname}", flush=True)
                     
