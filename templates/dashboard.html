@@ -229,18 +229,146 @@
 
         .success-message {
             display: none;
-            padding: 20px;
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 8px;
-            color: #155724;
-            margin-top: 20px;
+            margin-top: 30px;
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-card {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+            border-radius: 16px;
+            padding: 40px 30px;
             text-align: center;
+            box-shadow: 0 8px 32px rgba(40, 167, 69, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .success-icon {
-            font-size: 3em;
+            font-size: 4em;
             margin-bottom: 15px;
+            animation: bounceIn 0.6s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .success-title {
+            font-size: 2em;
+            font-weight: 700;
+            color: #155724;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .success-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #155724;
+        }
+
+        .success-stat-icon {
+            font-size: 1.5em;
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .success-button {
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .success-button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .success-button-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .success-button-secondary:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .redirect-timer {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #155724;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
         }
 
         .features {
@@ -356,9 +484,36 @@
             <div class="error-message" id="errorMessage"></div>
             
             <div class="success-message" id="successMessage">
-                <div class="success-icon">✅</div>
-                <div style="font-size: 1.3em; margin-bottom: 10px;">Success!</div>
-                <div id="successText">Redirecting to comparison view...</div>
+                <div class="success-card">
+                    <div class="success-icon">🎉</div>
+                    <div class="success-title">Scroll Uploaded Successfully!</div>
+                    
+                    <div class="success-details" id="successDetails">
+                        <div class="success-stat">
+                            <span class="success-stat-icon">📜</span>
+                            <span id="tenantCount">-</span> Tenant(s)
+                        </div>
+                        <div class="success-stat">
+                            <span class="success-stat-icon">📊</span>
+                            <span id="fileCount">-</span> Comparison(s)
+                        </div>
+                    </div>
+                    
+                    <div class="success-actions">
+                        <a href="/compare" class="success-button success-button-primary">
+                            <span>⚡</span>
+                            <span>View Comparisons</span>
+                        </a>
+                        <button onclick="location.reload()" class="success-button success-button-secondary">
+                            <span>📤</span>
+                            <span>Upload Another</span>
+                        </button>
+                    </div>
+                    
+                    <div class="redirect-timer" id="redirectTimer">
+                        Auto-redirecting in <span id="countdown">5</span> seconds...
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -463,15 +618,40 @@
         }
 
         function showSuccess(message, data) {
-            successText.textContent = message;
+            // Update counts
+            const tenantCount = document.getElementById('tenantCount');
+            const fileCount = document.getElementById('fileCount');
+            const countdown = document.getElementById('countdown');
+            
+            tenantCount.textContent = data.artifact_count || 0;
+            
+            // Calculate total file count
+            let totalFiles = 0;
+            if (data.structure) {
+                totalFiles = Object.values(data.structure).reduce((sum, files) => {
+                    return sum + Object.keys(files).length;
+                }, 0);
+            }
+            fileCount.textContent = totalFiles;
+            
             successMessage.style.display = 'block';
             progressSection.style.display = 'none';
             errorMessage.style.display = 'none';
             
-            // Redirect after 2 seconds
-            setTimeout(() => {
-                window.location.href = '/compare';
-            }, 2000);
+            // Countdown timer
+            let timeLeft = 5;
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/compare';
+                }
+            }, 1000);
+            
+            // Store interval ID so we can clear it if user clicks button
+            successMessage.dataset.intervalId = countdownInterval;
         }
     </script>
 </body>
