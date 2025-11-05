@@ -324,106 +324,6 @@
             border-bottom: 1px solid #e1e4e8;
             font-size: 0.9em;
             flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .stats-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .copy-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-        
-        .copy-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .copy-button:active {
-            transform: translateY(0);
-        }
-        
-        .copy-button.copied {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-        
-        .copy-icon-small {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-left: 8px;
-            font-size: 12px;
-        }
-        
-        .copy-icon-small:hover {
-            background: rgba(102, 126, 234, 0.2);
-            transform: scale(1.1);
-        }
-        
-        .copy-icon-small:active {
-            transform: scale(0.95);
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 16px 24px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-            z-index: 10000;
-            animation: slideInUp 0.3s ease, slideOutDown 0.3s ease 2.7s;
-            pointer-events: none;
-        }
-        
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOutDown {
-            from {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateY(100px);
-                opacity: 0;
-            }
         }
 
         .stat-badge {
@@ -816,13 +716,8 @@
                     const icon = fileId.startsWith('CHART') ? '📊' : '📋';
                     html += `
                         <div class="file-item" onclick="selectFile('${folderId}', '${fileId}')">
-                            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                                <span class="file-icon">${icon}</span>
-                                <span style="flex: 1;">${fileId}</span>
-                            </div>
-                            <span class="copy-icon-small" onclick="event.stopPropagation(); copyFileToClipboard('${folderId}', '${fileId}')" title="Copy to clipboard">
-                                📋
-                            </span>
+                            <span class="file-icon">${icon}</span>
+                            <span>${fileId}</span>
                         </div>
                     `;
                 }
@@ -919,28 +814,22 @@
             const statsBar = document.createElement('div');
             statsBar.className = 'stats-bar';
             statsBar.innerHTML = `
-                <div class="stats-group">
-                    <div class="stat-badge added">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.added}</strong> added</span>
-                    </div>
-                    <div class="stat-badge removed">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.removed}</strong> removed</span>
-                    </div>
-                    <div class="stat-badge modified">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.modified}</strong> modified</span>
-                    </div>
-                    <div class="stat-badge unchanged">
-                        <span class="stat-dot"></span>
-                        <span><strong>${data.stats.unchanged}</strong> unchanged</span>
-                    </div>
+                <div class="stat-badge added">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.added}</strong> added</span>
                 </div>
-                <button class="copy-button" onclick="copyDiffToClipboard('${data.folder_id}', '${data.file_id}')">
-                    <span>📋</span>
-                    <span>Copy Diff</span>
-                </button>
+                <div class="stat-badge removed">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.removed}</strong> removed</span>
+                </div>
+                <div class="stat-badge modified">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.modified}</strong> modified</span>
+                </div>
+                <div class="stat-badge unchanged">
+                    <span class="stat-dot"></span>
+                    <span><strong>${data.stats.unchanged}</strong> unchanged</span>
+                </div>
             `;
 
             // Create diff container
@@ -1211,142 +1100,6 @@
                 diffEditor.layout();
             }
         });
-
-        // Toast notification function
-        function showToast(message, icon = '✅') {
-            // Remove any existing toast
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-
-            // Create new toast
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <span style="font-size: 20px;">${icon}</span>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-
-            // Auto-remove after animation
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        // Copy diff to clipboard
-        async function copyDiffToClipboard(folderId, fileId) {
-            try {
-                const response = await fetch(`/api/compare?folder_id=${folderId}&file_id=${fileId}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    showToast('Failed to copy diff', '❌');
-                    return;
-                }
-
-                const mainContent = data.main_content || '';
-                const featContent = data.feat_content || '';
-
-                // Format diff content
-                let diffText = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                diffText += `📊 STAFFVIEW DIFF COMPARISON\n`;
-                diffText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-                diffText += `File: ${fileId}\n`;
-                diffText += `Tenant: ${folderId}\n`;
-                diffText += `Branch: main vs feat\n\n`;
-                diffText += `📈 Statistics:\n`;
-                diffText += `   ✅ Added: ${data.stats.added}\n`;
-                diffText += `   ❌ Removed: ${data.stats.removed}\n`;
-                diffText += `   ⚠️  Modified: ${data.stats.modified}\n`;
-                diffText += `   ⚪ Unchanged: ${data.stats.unchanged}\n\n`;
-                diffText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-                
-                // Add line-by-line comparison
-                const mainLines = mainContent.split('\n');
-                const featLines = featContent.split('\n');
-                const maxLines = Math.max(mainLines.length, featLines.length);
-
-                diffText += `┌─────────────────────── MAIN ───────────────────────┐   ┌─────────────────────── FEAT ───────────────────────┐\n`;
-                
-                for (let i = 0; i < maxLines; i++) {
-                    const mainLine = mainLines[i] || '';
-                    const featLine = featLines[i] || '';
-                    const lineNum = (i + 1).toString().padStart(4, ' ');
-                    
-                    const mainDisplay = mainLine.substring(0, 48).padEnd(48, ' ');
-                    const featDisplay = featLine.substring(0, 48).padEnd(48, ' ');
-                    
-                    let marker = ' ';
-                    if (mainLine !== featLine) {
-                        if (!mainLine) marker = '+';
-                        else if (!featLine) marker = '-';
-                        else marker = '~';
-                    }
-                    
-                    diffText += `${lineNum} ${marker} ${mainDisplay}   ${lineNum} ${marker} ${featDisplay}\n`;
-                }
-                
-                diffText += `└────────────────────────────────────────────────────┘   └────────────────────────────────────────────────────┘\n\n`;
-                diffText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                diffText += `Generated by StaffView - Gandalf's Tool for Regression Clarity\n`;
-                diffText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-
-                // Copy to clipboard
-                await navigator.clipboard.writeText(diffText);
-                
-                // Update button state
-                const button = event.target.closest('.copy-button');
-                if (button) {
-                    const originalHTML = button.innerHTML;
-                    button.classList.add('copied');
-                    button.innerHTML = '<span>✓</span><span>Copied!</span>';
-                    
-                    setTimeout(() => {
-                        button.classList.remove('copied');
-                        button.innerHTML = originalHTML;
-                    }, 2000);
-                }
-
-                showToast('Diff copied to clipboard!', '📋');
-            } catch (error) {
-                console.error('Copy error:', error);
-                showToast('Failed to copy diff', '❌');
-            }
-        }
-
-        // Copy file metadata to clipboard
-        async function copyFileToClipboard(folderId, fileId) {
-            try {
-                const response = await fetch(`/api/compare?folder_id=${folderId}&file_id=${fileId}`);
-                const data = await response.json();
-
-                if (data.error) {
-                    showToast('Failed to copy', '❌');
-                    return;
-                }
-
-                // Format metadata
-                let text = `📊 StaffView Report\n\n`;
-                text += `File: ${fileId}\n`;
-                text += `Tenant: ${folderId}\n`;
-                text += `Branch: main vs feat\n\n`;
-                text += `Statistics:\n`;
-                text += `  ✅ Added: ${data.stats.added}\n`;
-                text += `  ❌ Removed: ${data.stats.removed}\n`;
-                text += `  ⚠️  Modified: ${data.stats.modified}\n`;
-                text += `  ⚪ Unchanged: ${data.stats.unchanged}\n`;
-
-                // Copy to clipboard
-                await navigator.clipboard.writeText(text);
-                
-                showToast('File metadata copied!', '📋');
-            } catch (error) {
-                console.error('Copy error:', error);
-                showToast('Failed to copy', '❌');
-            }
-        }
     </script>
 </body>
 </html>
