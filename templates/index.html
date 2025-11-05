@@ -326,6 +326,69 @@
             flex-wrap: wrap;
         }
 
+        .copy-icon-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+            font-size: 12px;
+        }
+        
+        .copy-icon-small:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .copy-icon-small:active {
+            transform: scale(0.95);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(40, 167, 69, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideInUp 0.3s ease, slideOutDown 0.3s ease 2.7s;
+            pointer-events: none;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+        }
+
         .stat-badge {
             display: inline-flex;
             align-items: center;
@@ -716,8 +779,13 @@
                     const icon = fileId.startsWith('CHART') ? '📊' : '📋';
                     html += `
                         <div class="file-item" onclick="selectFile('${folderId}', '${fileId}')">
-                            <span class="file-icon">${icon}</span>
-                            <span>${fileId}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                                <span class="file-icon">${icon}</span>
+                                <span style="flex: 1;">${fileId}</span>
+                            </div>
+                            <span class="copy-icon-small" onclick="event.stopPropagation(); copyFileToClipboard('${folderId}', '${fileId}')" title="Copy to clipboard">
+                                📋
+                            </span>
                         </div>
                     `;
                 }
@@ -1100,6 +1168,63 @@
                 diffEditor.layout();
             }
         });
+
+        // Toast notification function
+        function showToast(message, icon = '✅') {
+            // Remove any existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <span style="font-size: 20px;">${icon}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            // Auto-remove after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Copy file metadata to clipboard
+        async function copyFileToClipboard(folderId, fileId) {
+            try {
+                console.log('Copying file metadata:', folderId, fileId);
+                const response = await fetch(`/api/compare?folder=${folderId}&file=${fileId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('API error:', data.error);
+                    showToast('Failed to copy: ' + data.error, '❌');
+                    return;
+                }
+
+                // Format metadata
+                let text = `📊 StaffView Report\n\n`;
+                text += `File: ${fileId}\n`;
+                text += `Tenant: ${folderId}\n`;
+                text += `Branch: main vs feat\n\n`;
+                text += `Statistics:\n`;
+                text += `  ✅ Added: ${data.stats.added}\n`;
+                text += `  ❌ Removed: ${data.stats.removed}\n`;
+                text += `  ⚠️  Modified: ${data.stats.modified}\n`;
+                text += `  ⚪ Unchanged: ${data.stats.unchanged}\n`;
+
+                // Copy to clipboard
+                await navigator.clipboard.writeText(text);
+                
+                showToast('File metadata copied!', '📋');
+            } catch (error) {
+                console.error('Copy error:', error);
+                showToast('Failed to copy: ' + error.message, '❌');
+            }
+        }
     </script>
 </body>
 </html>
