@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 StaffView - Gandalf's tool for regression clarity
-Compare regression test artifacts from GitHub Actions
+Compare regression test scrolls from GitHub Actions
 Compare, analyze, and illuminate test differences
 """
 
@@ -54,7 +54,7 @@ def login_required(f):
 
 
 def extract_artifact(zip_path, extract_to):
-    """Extract artifact zip file"""
+    """Extract scroll bundle zip file"""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
     return extract_to
@@ -62,7 +62,7 @@ def extract_artifact(zip_path, extract_to):
 
 def get_artifact_structure(base_path):
     """
-    Get the structure of the artifact directory
+    Get the structure of the scroll directory
     Returns: {folder_id: [file_pairs]}
     """
     base_path = Path(base_path)
@@ -279,7 +279,7 @@ def compare_view():
 @app.route('/api/structure')
 @login_required
 def get_structure():
-    """Get artifact directory structure"""
+    """Get scroll directory structure"""
     # Check if ARTIFACTS_DIR exists and has content
     if not ARTIFACTS_DIR.exists() or not any(ARTIFACTS_DIR.iterdir()):
         return jsonify({})
@@ -328,7 +328,7 @@ def compare():
 @app.route('/api/upload', methods=['POST'])
 @login_required
 def upload_artifact():
-    """Upload and extract artifact zip file"""
+    """Upload and extract scroll bundle zip file"""
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
     
@@ -362,7 +362,7 @@ def upload_artifact():
         
         return jsonify({
             'success': True,
-            'message': 'Artifact uploaded and extracted successfully',
+            'message': 'Scroll uploaded and extracted successfully',
             'artifact_count': len(structure),
             'structure': structure
         })
@@ -372,7 +372,7 @@ def upload_artifact():
 
 @app.route('/api/use-sample')
 def use_sample():
-    """Use the sample artifact directory"""
+    """Use the sample scroll directory"""
     global ARTIFACTS_DIR
     ARTIFACTS_DIR = Path("/Users/yeltsinz/Downloads/regression-diffs (1)")
     
@@ -380,7 +380,7 @@ def use_sample():
     
     return jsonify({
         'success': True,
-        'message': 'Using sample artifact directory',
+        'message': 'Using sample scroll directory',
         'artifact_count': len(structure),
         'structure': structure
     })
@@ -406,6 +406,6 @@ def serve_static(filename):
 if __name__ == '__main__':
     print("⚡ Starting StaffView...")
     print("   Gandalf's tool for regression clarity")
-    print(f"   Using artifacts from: {ARTIFACTS_DIR}")
+    print(f"   Using scrolls from: {ARTIFACTS_DIR}")
     app.run(debug=True, port=5001)
 

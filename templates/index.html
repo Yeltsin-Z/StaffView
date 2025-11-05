@@ -538,7 +538,7 @@
             font-weight: 600;
         }
 
-        .no-artifacts {
+        .no-scrolls {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -547,27 +547,27 @@
             text-align: center;
         }
 
-        .no-artifacts-icon {
+        .no-scrolls-icon {
             font-size: 5em;
             margin-bottom: 25px;
             opacity: 0.3;
         }
 
-        .no-artifacts h3 {
+        .no-scrolls h3 {
             color: #24292e;
             font-size: 1.4em;
             margin-bottom: 12px;
             font-weight: 700;
         }
 
-        .no-artifacts p {
+        .no-scrolls p {
             color: #586069;
             margin-bottom: 30px;
             line-height: 1.7;
             font-size: 1.05em;
         }
 
-        .no-artifacts a {
+        .no-scrolls a {
             display: inline-block;
             padding: 14px 28px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -579,7 +579,7 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .no-artifacts a:hover {
+        .no-scrolls a:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
         }
@@ -671,7 +671,7 @@
                 </div>
                 <div class="header-center">
                     <h1>⚡ StaffView</h1>
-                    <p class="header-tagline">Regression artifacts comparison</p>
+                    <p class="header-tagline">Regression scrolls comparison</p>
                 </div>
                 <div class="header-right">
                     <a href="/logout" class="logout-button">
@@ -685,8 +685,8 @@
         <div class="main-content">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <h2><span>📦</span> Artifacts</h2>
-                    <p id="artifacts-count">Loading...</p>
+                    <h2><span>📜</span> Scrolls</h2>
+                    <p id="scrolls-count">Loading...</p>
                 </div>
                 <div id="sidebar"></div>
             </div>
@@ -742,23 +742,23 @@
 
         function renderSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const artifactsCount = document.getElementById('artifacts-count');
+            const scrollsCount = document.getElementById('scrolls-count');
             
             if (Object.keys(currentStructure).length === 0) {
                 sidebar.innerHTML = `
-                    <div class="no-artifacts">
-                        <div class="no-artifacts-icon">📦</div>
-                        <h3>No Artifacts Uploaded</h3>
-                        <p>Upload an artifact from the dashboard to begin comparing.</p>
+                    <div class="no-scrolls">
+                        <div class="no-scrolls-icon">📜</div>
+                        <h3>No Scrolls Uploaded</h3>
+                        <p>Upload a scroll bundle from the dashboard to begin comparing.</p>
                         <a href="/">Go to Dashboard</a>
                     </div>
                 `;
-                artifactsCount.textContent = 'No artifacts';
+                scrollsCount.textContent = 'No scrolls';
                 return;
             }
 
             const totalFiles = Object.values(currentStructure).reduce((sum, files) => sum + Object.keys(files).length, 0);
-            artifactsCount.textContent = `${Object.keys(currentStructure).length} tenants · ${totalFiles} comparisons`;
+            scrollsCount.textContent = `${Object.keys(currentStructure).length} tenants · ${totalFiles} comparisons`;
 
             let html = '';
             for (const [folderId, fileGroups] of Object.entries(currentStructure)) {

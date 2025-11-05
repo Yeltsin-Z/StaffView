@@ -114,215 +114,69 @@
             margin-bottom: 30px;
         }
 
-        .vault-header {
-            text-align: center;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .vault-icon {
-            font-size: 3.5em;
-            margin-bottom: 10px;
-            animation: vaultPulse 3s ease-in-out infinite;
-            display: inline-block;
-        }
-
-        @keyframes vaultPulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .vault-title {
-            font-size: 1.8em;
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .vault-subtitle {
-            font-size: 1em;
-            color: #666;
-            font-weight: 400;
-        }
-
         .upload-area {
             border: 3px dashed #667eea;
-            border-radius: 20px;
-            padding: 50px 40px;
+            border-radius: 15px;
+            padding: 40px 40px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            transition: all 0.3s;
+            background: #f8f9fa;
             position: relative;
-            overflow: hidden;
-        }
-
-        .upload-area::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(102, 126, 234, 0.05) 50%,
-                transparent 70%
-            );
-            transition: all 0.5s;
-            opacity: 0;
-        }
-
-        .upload-area:hover::before {
-            opacity: 1;
-            transform: translate(50%, 50%) rotate(45deg);
         }
 
         .upload-area:hover {
             border-color: #5568d3;
-            background: linear-gradient(135deg, #e7f3ff 0%, #f0f5ff 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            background: #e7f3ff;
+            transform: translateY(-2px);
         }
 
         .upload-area.dragover {
             border-color: #28a745;
-            background: linear-gradient(135deg, #d4edda 0%, #e8f5e9 100%);
+            background: #d4edda;
             border-style: solid;
-            transform: scale(1.02);
-            box-shadow: 0 15px 40px rgba(40, 167, 69, 0.3);
-        }
-
-        .upload-icon-container {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 20px;
         }
 
         .upload-icon {
-            font-size: 3.5em;
-            position: relative;
-            z-index: 2;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .upload-pulse {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.3), transparent);
-            animation: pulse 2s ease-out infinite;
-            z-index: 1;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(1.5);
-                opacity: 0;
-            }
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
         }
 
         .upload-text {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
-            position: relative;
-            z-index: 2;
         }
 
         .upload-subtext {
-            color: #888;
+            color: #666;
             font-size: 0.9em;
-            margin-bottom: 18px;
-            position: relative;
-            z-index: 2;
+            margin-bottom: 15px;
         }
 
         .browse-button {
-            padding: 14px 40px;
+            padding: 12px 35px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1.05em;
+            border-radius: 10px;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             margin-top: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-        }
-
-        .browse-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .browse-button:hover::before {
-            width: 300px;
-            height: 300px;
         }
 
         .browse-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .browse-button:active {
             transform: translateY(0);
-        }
-
-        .button-icon {
-            font-size: 1.2em;
-        }
-
-        .upload-hint {
-            margin-top: 18px;
-            font-size: 0.85em;
-            color: #999;
-            font-style: italic;
-            position: relative;
-            z-index: 2;
         }
 
         .file-input {
@@ -458,7 +312,7 @@
         <div class="dashboard-content">
             <div class="welcome-section">
                 <h2>Welcome! 👋</h2>
-                <p>Upload your GitHub Actions artifact ZIP file to begin comparing regression test results between your feature branch and main branch.</p>
+                <p>Upload your test scroll bundle (ZIP file) to begin comparing regression test results between your feature branch and main branch.</p>
             </div>
 
             <div class="features">
@@ -480,24 +334,14 @@
             </div>
 
             <div class="upload-section">
-                <div class="vault-header">
-                    <div class="vault-icon">🔐</div>
-                    <h2 class="vault-title">Test Vault</h2>
-                    <p class="vault-subtitle">Upload your regression test artifacts for analysis</p>
-                </div>
                 <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon-container">
-                        <div class="upload-icon">⬆️</div>
-                        <div class="upload-pulse"></div>
-                    </div>
-                    <div class="upload-text">Drop your test archive here</div>
+                    <div class="upload-icon">📜</div>
+                    <div class="upload-text">Drop your scroll bundle here</div>
                     <div class="upload-subtext">or</div>
                     <button class="browse-button" id="browseBtn">
-                        <span class="button-icon">📁</span>
-                        <span>Browse Files</span>
+                        📁 Browse Files
                     </button>
                     <input type="file" id="fileInput" class="file-input" accept=".zip">
-                    <div class="upload-hint">Accepts ZIP files from GitHub Actions artifacts</div>
                 </div>
             </div>
 
@@ -506,7 +350,7 @@
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
-                <div class="progress-text" id="progressText">Processing artifact...</div>
+                <div class="progress-text" id="progressText">Processing scroll...</div>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -576,7 +420,7 @@
 
         // Upload file
         async function uploadFile(file) {
-            showProgress('Uploading and extracting artifact...');
+            showProgress('Uploading and extracting scroll...');
             
             const formData = new FormData();
             formData.append('file', file);
