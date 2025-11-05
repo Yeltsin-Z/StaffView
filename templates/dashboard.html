@@ -229,7 +229,8 @@
 
         .success-message {
             display: none;
-            margin-top: 20px;
+            margin: 40px auto;
+            max-width: 900px;
             animation: slideInUp 0.5s ease;
         }
 
@@ -622,6 +623,9 @@
             const tenantCount = document.getElementById('tenantCount');
             const fileCount = document.getElementById('fileCount');
             const countdown = document.getElementById('countdown');
+            const uploadSection = document.querySelector('.upload-section');
+            const features = document.querySelector('.features');
+            const welcomeSection = document.querySelector('.welcome-section');
             
             tenantCount.textContent = data.artifact_count || 0;
             
@@ -633,6 +637,11 @@
                 }, 0);
             }
             fileCount.textContent = totalFiles;
+            
+            // Hide upload area and features to make room for success message
+            if (uploadSection) uploadSection.style.display = 'none';
+            if (features) features.style.display = 'none';
+            if (welcomeSection) welcomeSection.style.display = 'none';
             
             successMessage.style.display = 'block';
             progressSection.style.display = 'none';
