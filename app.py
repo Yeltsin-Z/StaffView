@@ -384,14 +384,33 @@ def upload_artifact():
 
 
 @app.route('/api/download-zip/<filename>')
-@login_required
 def download_zip(filename):
-    """Download ZIP file from linear_attachments folder"""
+    """
+    Download ZIP file from linear_attachments folder
+    Note: No login required - this endpoint is used by Linear attachments
+    Files are accessed via specific filenames only (tenant-chart-id.zip)
+    """
     try:
+        # Security: Only allow downloading from linear_attachments directory
+        # and prevent directory traversal attacks
+        if '..' in filename or '/' in filename:
+            return jsonify({'error': 'Invalid filename'}), 400
+        
         zip_path = LINEAR_ATTACHMENTS_DIR / filename
+        
+        # Log the request for debugging
+        print(f"📥 ZIP download requested: {filename}", flush=True)
+        print(f"   Looking in: {LINEAR_ATTACHMENTS_DIR}", flush=True)
+        print(f"   Full path: {zip_path}", flush=True)
+        print(f"   Exists: {zip_path.exists()}", flush=True)
+        
         if not zip_path.exists():
+            # List available files for debugging
+            available_files = list(LINEAR_ATTACHMENTS_DIR.glob('*.zip'))
+            print(f"   Available ZIP files: {[f.name for f in available_files]}", flush=True)
             return jsonify({'error': 'ZIP file not found'}), 404
         
+        print(f"   ✅ Sending file: {zip_path.name}", flush=True)
         return send_file(
             zip_path,
             mimetype='application/zip',
@@ -399,6 +418,7 @@ def download_zip(filename):
             download_name=filename
         )
     except Exception as e:
+        print(f"   ❌ Error downloading ZIP: {str(e)}", flush=True)
         return jsonify({'error': str(e)}), 500
 
 
