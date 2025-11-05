@@ -324,6 +324,39 @@
             border-bottom: 1px solid #e1e4e8;
             font-size: 0.9em;
             flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-badges {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .download-diff-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-diff-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-diff-button:active {
+            transform: translateY(0);
         }
 
         .copy-icon-small {
@@ -882,22 +915,28 @@
             const statsBar = document.createElement('div');
             statsBar.className = 'stats-bar';
             statsBar.innerHTML = `
-                <div class="stat-badge added">
-                    <span class="stat-dot"></span>
-                    <span><strong>${data.stats.added}</strong> added</span>
+                <div class="stats-badges">
+                    <div class="stat-badge added">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.added}</strong> added</span>
+                    </div>
+                    <div class="stat-badge removed">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.removed}</strong> removed</span>
+                    </div>
+                    <div class="stat-badge modified">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.modified}</strong> modified</span>
+                    </div>
+                    <div class="stat-badge unchanged">
+                        <span class="stat-dot"></span>
+                        <span><strong>${data.stats.unchanged}</strong> unchanged</span>
+                    </div>
                 </div>
-                <div class="stat-badge removed">
-                    <span class="stat-dot"></span>
-                    <span><strong>${data.stats.removed}</strong> removed</span>
-                </div>
-                <div class="stat-badge modified">
-                    <span class="stat-dot"></span>
-                    <span><strong>${data.stats.modified}</strong> modified</span>
-                </div>
-                <div class="stat-badge unchanged">
-                    <span class="stat-dot"></span>
-                    <span><strong>${data.stats.unchanged}</strong> unchanged</span>
-                </div>
+                <button class="download-diff-button" id="downloadDiffBtn" data-folder="${data.folder_id}" data-file="${data.file_id}">
+                    <span>⬇️</span>
+                    <span>Download Diff</span>
+                </button>
             `;
 
             // Create diff container
@@ -909,6 +948,16 @@
             editorContent.appendChild(header);
             editorContent.appendChild(statsBar);
             editorContent.appendChild(diffContainer);
+
+            // Add event listener for download button
+            const downloadBtn = document.getElementById('downloadDiffBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    const folderId = this.getAttribute('data-folder');
+                    const fileId = this.getAttribute('data-file');
+                    downloadDiffAsHTML(data, folderId, fileId);
+                });
+            }
 
             // Initialize Monaco Diff Editor
             const initEditor = () => {
@@ -1223,6 +1272,345 @@
             } catch (error) {
                 console.error('Copy error:', error);
                 showToast('Failed to copy: ' + error.message, '❌');
+            }
+        }
+
+        // Download diff as HTML with CSS styling
+        function downloadDiffAsHTML(data, folderId, fileId) {
+            try {
+                const mainContent = data.main_content || '';
+                const featContent = data.feat_content || '';
+                const mainLines = mainContent.split('\n');
+                const featLines = featContent.split('\n');
+                const maxLines = Math.max(mainLines.length, featLines.length);
+
+                // Generate side-by-side diff HTML
+                let diffRowsHTML = '';
+                for (let i = 0; i < maxLines; i++) {
+                    const mainLine = mainLines[i] !== undefined ? mainLines[i] : '';
+                    const featLine = featLines[i] !== undefined ? featLines[i] : '';
+                    const lineNum = i + 1;
+                    
+                    let rowClass = 'diff-unchanged';
+                    if (mainLine !== featLine) {
+                        if (mainLine === '') {
+                            rowClass = 'diff-added';
+                        } else if (featLine === '') {
+                            rowClass = 'diff-removed';
+                        } else {
+                            rowClass = 'diff-modified';
+                        }
+                    }
+                    
+                    const escapedMainLine = mainLine.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const escapedFeatLine = featLine.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    
+                    diffRowsHTML += `
+                        <tr class="${rowClass}">
+                            <td class="line-num">${lineNum}</td>
+                            <td class="line-content">${escapedMainLine || '&nbsp;'}</td>
+                            <td class="line-num">${lineNum}</td>
+                            <td class="line-content">${escapedFeatLine || '&nbsp;'}</td>
+                        </tr>
+                    `;
+                }
+
+                // Create complete HTML document
+                const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaffView Diff Report - ${fileId}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, monospace;
+            background: #f6f8fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1em;
+        }
+        
+        .info-section {
+            padding: 25px 30px;
+            background: white;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            padding: 15px;
+            background: #f6f8fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-label {
+            font-size: 0.85em;
+            color: #586069;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .info-value {
+            font-size: 1.1em;
+            color: #24292e;
+            font-weight: 600;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .stat-badge.added {
+            background: linear-gradient(135deg, #dcffe4 0%, #c6f6d5 100%);
+            color: #0f5132;
+            border: 1px solid #9ae6b4;
+        }
+        
+        .stat-badge.removed {
+            background: linear-gradient(135deg, #ffe5e5 0%, #ffd0d0 100%);
+            color: #842029;
+            border: 1px solid #f5b7b1;
+        }
+        
+        .stat-badge.modified {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            color: #664d03;
+            border: 1px solid #ffc947;
+        }
+        
+        .stat-badge.unchanged {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            color: #57606a;
+            border: 1px solid #d0d7de;
+        }
+        
+        .diff-container {
+            overflow-x: auto;
+        }
+        
+        .diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .diff-table thead th {
+            background: #f6f8fa;
+            color: #24292e;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid #d0d7de;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .diff-table .line-num {
+            background: #f6f8fa;
+            color: #57606a;
+            padding: 2px 12px;
+            text-align: right;
+            width: 60px;
+            user-select: none;
+            border-right: 1px solid #d0d7de;
+            font-size: 12px;
+        }
+        
+        .diff-table .line-content {
+            padding: 2px 15px;
+            white-space: pre;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .diff-unchanged {
+            background: white;
+        }
+        
+        .diff-added {
+            background: #dcffe4;
+        }
+        
+        .diff-added .line-content {
+            background: #acf2bd;
+        }
+        
+        .diff-removed {
+            background: #ffe5e5;
+        }
+        
+        .diff-removed .line-content {
+            background: #ffc1c1;
+        }
+        
+        .diff-modified {
+            background: #fff3cd;
+        }
+        
+        .diff-modified .line-content {
+            background: #ffe69c;
+        }
+        
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            background: #f6f8fa;
+            color: #57606a;
+            font-size: 0.9em;
+            border-top: 1px solid #d0d7de;
+        }
+        
+        .footer strong {
+            color: #667eea;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ StaffView Diff Report</h1>
+            <p>Gandalf's tool for regression clarity</p>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">File</div>
+                    <div class="info-value">${fileId}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tenant</div>
+                    <div class="info-value">${folderId}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Comparison</div>
+                    <div class="info-value">main ⇄ feat</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Generated</div>
+                    <div class="info-value">${new Date().toLocaleString()}</div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-badge added">
+                    <span>✅</span>
+                    <span><strong>${data.stats.added}</strong> Added</span>
+                </div>
+                <div class="stat-badge removed">
+                    <span>❌</span>
+                    <span><strong>${data.stats.removed}</strong> Removed</span>
+                </div>
+                <div class="stat-badge modified">
+                    <span>⚠️</span>
+                    <span><strong>${data.stats.modified}</strong> Modified</span>
+                </div>
+                <div class="stat-badge unchanged">
+                    <span>⚪</span>
+                    <span><strong>${data.stats.unchanged}</strong> Unchanged</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="diff-container">
+            <table class="diff-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">⎇ main</th>
+                        <th colspan="2">⎇ feat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${diffRowsHTML}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by <strong>StaffView</strong> - Gandalf's tool for regression clarity</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+                // Create filename: tenant-id-file-id-report.html
+                const filename = `${folderId}-${fileId}-report.html`;
+                
+                // Create blob and download
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('Diff downloaded successfully!', '⬇️');
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Failed to download diff: ' + error.message, '❌');
             }
         }
     </script>
