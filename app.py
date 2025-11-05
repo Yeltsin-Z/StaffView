@@ -923,6 +923,14 @@ def create_linear_issue():
                         print(f"   ⚠️ Unexpected attachment response: {attachment_result}", flush=True)
                         attachment_created = False
                     
+                    # Determine if it's a chart or model intelligently
+                    if file_id.upper().startswith('CHART-'):
+                        resource_type = 'chart'
+                    elif file_id.upper().startswith('MODEL-'):
+                        resource_type = 'model'
+                    else:
+                        resource_type = 'chart/model'
+                    
                     # Update issue description
                     updated_description = f"""📊 Regression Diff Report
 
@@ -938,7 +946,7 @@ def create_linear_issue():
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
 
 ---
-📦 **Scroll Files**: Download the attached ZIP file above to access the main and feat CSV files for this chart/model.
+📦 **Scroll Files**: Download the attached ZIP file from Resources that contains main and feat files for this {resource_type}.
 
 🔗 **Interactive Comparison**: Upload the ZIP file at [{app_url}]({app_url}) to view the full side-by-side diff in StaffView.
 """
