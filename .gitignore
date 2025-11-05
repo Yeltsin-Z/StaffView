@@ -6,6 +6,7 @@ __pycache__/
 .Python
 uploads/*
 !uploads/.gitkeep
+linear_attachments/*.zip
 server.log
 *.log
 .DS_Store

@@ -6,19 +6,28 @@ Compare, analyze, and illuminate test differences
 """
 
 import os
+import sys
 import zipfile
 import shutil
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_from_directory, session, redirect, url_for, flash
 import csv
-from io import StringIO
+from io import StringIO, BytesIO
 from difflib import unified_diff, SequenceMatcher
 import json
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
+import base64
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'staffview-secret-key-change-in-production')
+
+# Linear Configuration
+# Set these as environment variables in production
+LINEAR_API_KEY = os.environ.get('LINEAR_API_KEY')
+LINEAR_API_URL = 'https://api.linear.app/graphql'
+LINEAR_TEAM_ID = os.environ.get('LINEAR_TEAM_ID', 'ENG')  # Default to ENG team
 
 # Configuration
 UPLOAD_FOLDER = Path(__file__).parent / "uploads"
@@ -33,6 +42,10 @@ ARTIFACTS_DIR = Path(os.getenv('ARTIFACTS_DIR', str(default_artifacts)))
 local_dev_path = Path("/Users/yeltsinz/Downloads/regression-diffs (1)")
 if local_dev_path.exists():
     ARTIFACTS_DIR = local_dev_path
+
+# Directory for storing ZIP files for Linear attachments
+LINEAR_ATTACHMENTS_DIR = Path(__file__).parent / 'linear_attachments'
+LINEAR_ATTACHMENTS_DIR.mkdir(exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
@@ -371,16 +384,30 @@ def upload_artifact():
 
 
 @app.route('/api/use-sample')
+@login_required
 def use_sample():
-    """Use the sample scroll directory"""
+    """Use the sample scroll directory (development only)"""
     global ARTIFACTS_DIR
-    ARTIFACTS_DIR = Path("/Users/yeltsinz/Downloads/regression-diffs (1)")
     
+    # Try to get sample path from environment variable first
+    sample_path = os.getenv('SAMPLE_SCROLLS_PATH', '/Users/yeltsinz/Downloads/regression-diffs (1)')
+    sample_path = Path(sample_path)
+    
+    # Verify the path exists before using it
+    if not sample_path.exists():
+        return jsonify({
+            'success': False,
+            'error': 'Sample scrolls directory not found',
+            'message': f'Path does not exist: {sample_path}',
+            'hint': 'Set SAMPLE_SCROLLS_PATH environment variable or upload scrolls via the dashboard'
+        }), 404
+    
+    ARTIFACTS_DIR = sample_path
     structure = get_artifact_structure(ARTIFACTS_DIR)
     
     return jsonify({
         'success': True,
-        'message': 'Using sample scroll directory',
+        'message': f'Using sample scroll directory: {sample_path}',
         'artifact_count': len(structure),
         'structure': structure
     })
@@ -403,9 +430,607 @@ def serve_static(filename):
     return send_from_directory(static_dir, filename)
 
 
+# Linear API Integration
+
+# Cache for team UUID
+_team_uuid_cache = {}
+
+def linear_graphql_request(query, variables=None):
+    """Make a GraphQL request to Linear API"""
+    if not LINEAR_API_KEY:
+        return {'error': 'Linear API key not configured'}
+    
+    headers = {
+        'Authorization': LINEAR_API_KEY,
+        'Content-Type': 'application/json'
+    }
+    
+    payload = {'query': query}
+    if variables:
+        payload['variables'] = variables
+    
+    try:
+        response = requests.post(LINEAR_API_URL, json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        # Get the actual error response from Linear
+        error_detail = {'error': str(e)}
+        try:
+            error_body = response.json()
+            error_detail['response'] = error_body
+            print(f"❌ Linear API Error: {error_body}", flush=True)
+        except:
+            error_detail['response'] = response.text
+            print(f"❌ Linear API Error (raw): {response.text}", flush=True)
+        return error_detail
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Request Exception: {str(e)}", flush=True)
+        return {'error': str(e)}
+
+
+def get_team_uuid(team_key):
+    """Get the UUID for a team given its key (e.g., 'ENG')"""
+    # Check cache first
+    if team_key in _team_uuid_cache:
+        return _team_uuid_cache[team_key]
+    
+    query = """
+    query Teams {
+        teams {
+            nodes {
+                id
+                key
+                name
+            }
+        }
+    }
+    """
+    
+    result = linear_graphql_request(query)
+    
+    if 'errors' in result or 'error' in result:
+        print(f"Error fetching teams: {result}")
+        return None
+    
+    try:
+        teams = result['data']['teams']['nodes']
+        for team in teams:
+            _team_uuid_cache[team['key']] = team['id']
+            if team['key'] == team_key:
+                print(f"Found team UUID for '{team_key}': {team['id']}")
+                return team['id']
+    except (KeyError, TypeError) as e:
+        print(f"Error parsing teams: {e}")
+        return None
+    
+    return None
+
+
+@app.route('/api/linear/team-members')
+@login_required
+def get_linear_team_members():
+    """Get team members from Linear"""
+    if not LINEAR_API_KEY:
+        return jsonify({
+            'success': False,
+            'error': 'Linear API key not configured. Please set LINEAR_API_KEY environment variable.'
+        }), 400
+    
+    # Get team UUID from key
+    team_uuid = get_team_uuid(LINEAR_TEAM_ID)
+    if not team_uuid:
+        return jsonify({
+            'success': False,
+            'error': f'Could not find team with key: {LINEAR_TEAM_ID}'
+        }), 404
+    
+    # GraphQL query to get team members (with team info for verification)
+    query = """
+    query TeamMembers($teamId: String!) {
+        team(id: $teamId) {
+            key
+            name
+            members {
+                nodes {
+                    id
+                    name
+                    displayName
+                    email
+                    active
+                }
+            }
+        }
+    }
+    """
+    
+    variables = {'teamId': team_uuid}
+    
+    print(f"Fetching team members for team UUID: {team_uuid} (key: {LINEAR_TEAM_ID})")
+    
+    result = linear_graphql_request(query, variables)
+    
+    if 'error' in result:
+        return jsonify({'success': False, 'error': result['error']}), 500
+    
+    if 'errors' in result:
+        return jsonify({'success': False, 'error': result['errors'][0]['message']}), 500
+    
+    try:
+        team_data = result['data']['team']
+        team_key = team_data.get('key', '')
+        team_name = team_data.get('name', '')
+        members = team_data['members']['nodes']
+        
+        print(f"Found {len(members)} members in team '{team_name}' (key: {team_key})")
+        
+        # Filter active members only from the ENG team
+        # Use displayName (nickname) if available, otherwise fall back to full name
+        active_members = [
+            {
+                'id': m['id'], 
+                'name': m.get('displayName') or m['name'],  # Prefer displayName (nickname)
+                'email': m.get('email', '')
+            }
+            for m in members if m.get('active', True)
+        ]
+        
+        print(f"Returning {len(active_members)} active members from ENG team")
+        for member in active_members:
+            print(f"  - {member['name']} ({member['email']})")
+        
+        return jsonify({'success': True, 'members': active_members, 'team': team_key})
+    except (KeyError, TypeError) as e:
+        print(f"Error parsing team members: {e}")
+        return jsonify({'success': False, 'error': f'Failed to parse team members: {str(e)}'}), 500
+
+
+@app.route('/api/linear/create-issue', methods=['POST'])
+@login_required
+def create_linear_issue():
+    """Create a Linear issue with HTML attachment"""
+    if not LINEAR_API_KEY:
+        return jsonify({
+            'success': False,
+            'error': 'Linear API key not configured. Please set LINEAR_API_KEY environment variable.'
+        }), 400
+    
+    # Get team UUID from key
+    team_uuid = get_team_uuid(LINEAR_TEAM_ID)
+    if not team_uuid:
+        return jsonify({
+            'success': False,
+            'error': f'Could not find team with key: {LINEAR_TEAM_ID}'
+        }), 404
+    
+    data = request.json
+    folder_id = data.get('folderId')
+    file_id = data.get('fileId')
+    assignee_id = data.get('assigneeId')
+    stats = data.get('stats', {})
+    attach_zip = data.get('attachZip', True)  # Default to True for backward compatibility
+    
+    if not all([folder_id, file_id, assignee_id]):
+        return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+    
+    print(f"\n{'='*60}", flush=True)
+    print(f"📝 Creating Linear issue with attachZip={attach_zip}", flush=True)
+    print(f"   Folder: {folder_id}, File: {file_id}", flush=True)
+    print(f"{'='*60}\n", flush=True)
+    
+    # Create issue title
+    title = f"Gandalf's StaffView Report for {folder_id}-{file_id}"
+    
+    # Get app URL (use Render deployment URL or environment variable)
+    app_url = os.environ.get('STAFFVIEW_URL', 'https://staffview.onrender.com')
+    
+    # Create issue description with app link
+    description = f"""📊 Regression Diff Report
+
+**File**: {file_id}
+**Tenant**: {folder_id}
+
+**Statistics**:
+✅ Added: {stats.get('added', 0)}
+❌ Removed: {stats.get('removed', 0)}
+⚠️ Modified: {stats.get('modified', 0)}
+⚪ Unchanged: {stats.get('unchanged', 0)}
+
+**Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
+
+---
+📦 **Attached ZIP**: Contains main and feat files for this specific chart/model
+🔗 **View in StaffView**: Upload the attached ZIP at [{app_url}]({app_url}) to compare interactively
+"""
+    
+    # Step 1: Create ZIP file with only the specific chart/model files (if requested)
+    zip_file_data = None
+    if attach_zip:
+        try:
+            tenant_path = os.path.join(ARTIFACTS_DIR, folder_id)
+            
+            print(f"🔍 Checking tenant path: {tenant_path}", flush=True)
+            print(f"🔍 ARTIFACTS_DIR: {ARTIFACTS_DIR}", flush=True)
+            print(f"🔍 Folder ID: {folder_id}", flush=True)
+            print(f"🔍 File ID: {file_id}", flush=True)
+            
+            if not os.path.exists(tenant_path):
+                print(f"❌ Tenant folder not found: {tenant_path}", flush=True)
+            else:
+                print(f"✅ Tenant folder exists: {tenant_path}", flush=True)
+                print(f"📦 Creating ZIP for {file_id} from tenant {folder_id}", flush=True)
+                
+                # Try multiple file path patterns
+                # Pattern 1: tenant/main/MODEL.csv and tenant/feat/MODEL.csv
+                # Pattern 2: tenant/MODEL-main and tenant/MODEL-feat (no extension)
+                main_patterns = [
+                    os.path.join(tenant_path, 'main', f"{file_id}.csv"),
+                    os.path.join(tenant_path, f"{file_id}-main"),
+                ]
+                feat_patterns = [
+                    os.path.join(tenant_path, 'feat', f"{file_id}.csv"),
+                    os.path.join(tenant_path, f"{file_id}-feat"),
+                ]
+                
+                # Check if files exist
+                files_to_add = []
+                
+                # Find main file
+                main_file = None
+                for pattern in main_patterns:
+                    if os.path.exists(pattern):
+                        main_file = pattern
+                        files_to_add.append(('main', main_file))
+                        print(f"  ✅ Found main file: {main_file}", flush=True)
+                        break
+                if not main_file:
+                    print(f"  ⚠️ Main file not found. Tried: {main_patterns}", flush=True)
+                
+                # Find feat file
+                feat_file = None
+                for pattern in feat_patterns:
+                    if os.path.exists(pattern):
+                        feat_file = pattern
+                        files_to_add.append(('feat', feat_file))
+                        print(f"  ✅ Found feat file: {feat_file}", flush=True)
+                        break
+                if not feat_file:
+                    print(f"  ⚠️ Feat file not found. Tried: {feat_patterns}", flush=True)
+                
+                if files_to_add:
+                    # Save ZIP file to disk in linear_attachments folder
+                    filename = f"{folder_id}-{file_id}.zip"
+                    zip_filepath = LINEAR_ATTACHMENTS_DIR / filename
+                    
+                    print(f"  Creating ZIP file: {zip_filepath}", flush=True)
+                    
+                    with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                        # Add only the specific main and feat files
+                        for branch, file_path in files_to_add:
+                            # Use structure: tenant_folder/branch/filename.csv
+                            arcname = f"{folder_id}/{branch}/{file_id}.csv"
+                            zipf.write(file_path, arcname)
+                            print(f"  ✅ Added to ZIP: {arcname}", flush=True)
+                    
+                    # Get the file size
+                    file_size = zip_filepath.stat().st_size
+                    
+                    print(f"✅ ZIP file saved: {zip_filepath} ({file_size} bytes)", flush=True)
+                    
+                    zip_file_data = {
+                        'filename': filename,
+                        'filepath': str(zip_filepath),
+                        'size': file_size
+                    }
+                else:
+                    print(f"❌ No files found to add to ZIP for {file_id}", flush=True)
+        except Exception as e:
+            print(f"❌ Failed to create ZIP file: {str(e)}", flush=True)
+            import traceback
+            traceback.print_exc()
+    else:
+        print(f"ℹ️ ZIP attachment disabled by user toggle", flush=True)
+    
+    # Check if ZIP was created
+    if zip_file_data:
+        print(f"✅ ZIP file data ready: {zip_file_data['filename']} ({zip_file_data['size']} bytes)", flush=True)
+    else:
+        print(f"⚠️ No ZIP file data created!", flush=True)
+    
+    # Step 2: Get the current cycle
+    cycle_query = """
+    query ActiveCycle($teamId: String!) {
+        team(id: $teamId) {
+            activeCycle {
+                id
+                name
+            }
+        }
+    }
+    """
+    
+    cycle_result = linear_graphql_request(cycle_query, {'teamId': team_uuid})
+    cycle_id = None
+    
+    if 'errors' not in cycle_result and 'data' in cycle_result:
+        try:
+            cycle_id = cycle_result['data']['team']['activeCycle']['id']
+        except (KeyError, TypeError):
+            pass  # No active cycle
+    
+    # Step 3: Create the issue
+    create_query = """
+    mutation IssueCreate($input: IssueCreateInput!) {
+        issueCreate(input: $input) {
+            success
+            issue {
+                id
+                identifier
+                url
+            }
+        }
+    }
+    """
+    
+    # Build issue input (without null values)
+    issue_input = {
+        'teamId': team_uuid,
+        'title': title,
+        'description': description,
+        'assigneeId': assignee_id,
+    }
+    
+    # Get the "Todo" state ID for the team
+    state_query = """
+    query TeamStates($teamId: String!) {
+        team(id: $teamId) {
+            states {
+                nodes {
+                    id
+                    name
+                    type
+                }
+            }
+        }
+    }
+    """
+    
+    state_result = linear_graphql_request(state_query, {'teamId': team_uuid})
+    
+    if 'errors' not in state_result and 'data' in state_result:
+        try:
+            states = state_result['data']['team']['states']['nodes']
+            # Find "Todo" state specifically (prioritize Todo over Backlog)
+            todo_state = None
+            backlog_state = None
+            
+            for state in states:
+                state_name_lower = state['name'].lower()
+                if state_name_lower == 'todo':
+                    todo_state = state['id']
+                    break  # Found Todo, use it immediately
+                elif state_name_lower == 'backlog' and not todo_state:
+                    backlog_state = state['id']
+                elif state['type'] == 'unstarted' and not todo_state and not backlog_state:
+                    backlog_state = state['id']
+            
+            # Prioritize Todo, then Backlog, then any unstarted state
+            if todo_state:
+                issue_input['stateId'] = todo_state
+                print(f"Using Todo state: {todo_state}")
+            elif backlog_state:
+                issue_input['stateId'] = backlog_state
+                print(f"Using Backlog/Unstarted state: {backlog_state}")
+        except (KeyError, TypeError) as e:
+            print(f"Error finding state: {e}")
+            pass  # Will use default state
+    
+    # Add cycle if available (automatically assign to current cycle)
+    if cycle_id:
+        issue_input['cycleId'] = cycle_id
+        print(f"Assigned to current cycle: {cycle_id}")
+    
+    # Set priority to High (2 = High in Linear)
+    # Linear priority values: 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low
+    issue_input['priority'] = 2
+    print(f"Set priority to High (2)")
+    
+    # Debug log
+    print(f"Creating Linear issue with input: {issue_input}")
+    
+    create_result = linear_graphql_request(create_query, {'input': issue_input})
+    
+    # Debug log
+    print(f"Linear API response: {create_result}")
+    
+    if 'error' in create_result:
+        return jsonify({'success': False, 'error': create_result['error']}), 500
+    
+    if 'errors' in create_result:
+        error_msg = create_result['errors'][0]['message']
+        print(f"Linear API error: {error_msg}")
+        # Include more details in the error
+        error_details = create_result['errors'][0].get('extensions', {})
+        if error_details:
+            error_msg += f" - Details: {error_details}"
+        return jsonify({'success': False, 'error': error_msg}), 500
+    
+    try:
+        issue_data = create_result['data']['issueCreate']
+        if issue_data['success']:
+            issue_id = issue_data['issue']['id']
+            issue_identifier = issue_data['issue']['identifier']
+            issue_url = issue_data['issue']['url']
+            
+            print(f"✅ Issue created: {issue_identifier}", flush=True)
+            print(f"   Issue ID: {issue_id}", flush=True)
+            print(f"   Issue URL: {issue_url}", flush=True)
+            
+            # Step 4: Upload and attach the ZIP file to the issue
+            print(f"\n🔍 Checking if zip_file_data exists: {zip_file_data is not None}", flush=True)
+            if zip_file_data:
+                print(f"✅ ZIP file data found: {zip_file_data['filename']} ({zip_file_data['size']} bytes)", flush=True)
+                try:
+                    print(f"📤 Uploading ZIP file and attaching to issue...", flush=True)
+                    
+                    # Get upload URL from Linear (correct API according to Linear's error messages)
+                    upload_query = """
+                    mutation FileUpload($contentType: String!, $filename: String!, $size: Int!) {
+                        fileUpload(contentType: $contentType, filename: $filename, size: $size) {
+                            uploadFile {
+                                uploadUrl
+                                assetUrl
+                            }
+                            success
+                        }
+                    }
+                    """
+                    
+                    upload_vars = {
+                        'contentType': 'application/zip',
+                        'filename': zip_file_data['filename'],
+                        'size': int(zip_file_data['size'])  # Ensure it's an integer
+                    }
+                    
+                    print(f"   Step 1: Getting upload URL from Linear...", flush=True)
+                    print(f"   Variables: contentType={upload_vars['contentType']}, filename={upload_vars['filename']}, size={upload_vars['size']} (type: {type(upload_vars['size'])})", flush=True)
+                    upload_result = linear_graphql_request(upload_query, upload_vars)
+                    
+                    print(f"   Upload result: {upload_result}", flush=True)
+                    
+                    if 'error' in upload_result:
+                        print(f"   ❌ Request error: {upload_result['error']}", flush=True)
+                        if 'response' in upload_result:
+                            print(f"   ❌ Response details: {upload_result['response']}", flush=True)
+                    elif 'errors' in upload_result:
+                        print(f"   ❌ GraphQL errors: {upload_result['errors']}", flush=True)
+                    elif 'data' in upload_result and 'fileUpload' in upload_result['data']:
+                        upload_file = upload_result['data']['fileUpload'].get('uploadFile')
+                        if upload_file:
+                            upload_url = upload_file['uploadUrl']
+                            asset_url = upload_file['assetUrl']
+                            
+                            print(f"   ✅ Got upload URL from Linear!", flush=True)
+                            print(f"   Step 2: Uploading ZIP file to Linear storage...", flush=True)
+                        else:
+                            print(f"   ❌ No uploadFile in response: {upload_result}", flush=True)
+                            upload_url = None
+                            asset_url = None
+                        
+                        if upload_url and asset_url:
+                            # Upload the file to Linear's storage (Google Cloud Storage)
+                            # Read the ZIP file from disk
+                            zip_filepath = Path(zip_file_data['filepath'])
+                            file_size = zip_file_data['size']
+                            
+                            print(f"   Reading ZIP file from: {zip_filepath}", flush=True)
+                            print(f"   Uploading {file_size} bytes to Google Cloud Storage...", flush=True)
+                            
+                            # Read file content into memory
+                            with open(zip_filepath, 'rb') as f:
+                                file_content = f.read()
+                            
+                            print(f"   File content size: {len(file_content)} bytes", flush=True)
+                            
+                            # Upload to Google Cloud Storage with minimal headers
+                            # Only include Content-Type (host is auto-added by requests)
+                            upload_response = requests.put(
+                                upload_url,
+                                data=file_content,
+                                headers={
+                                    'Content-Type': 'application/zip'
+                                }
+                            )
+                            
+                            print(f"   Upload response status: {upload_response.status_code}", flush=True)
+                            
+                            if upload_response.status_code in [200, 201]:
+                                print(f"   ✅ ZIP file uploaded successfully!", flush=True)
+                                print(f"   Asset URL: {asset_url}", flush=True)
+                                print(f"   Step 3: Updating issue description with ZIP download link...", flush=True)
+                                
+                                # Update the issue description to include the download link
+                                updated_description = f"""📊 Regression Diff Report
+
+**File**: {file_id}
+**Tenant**: {folder_id}
+
+**Statistics**:
+✅ Added: {stats.get('added', 0)}
+❌ Removed: {stats.get('removed', 0)}
+⚠️ Modified: {stats.get('modified', 0)}
+⚪ Unchanged: {stats.get('unchanged', 0)}
+
+**Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
+
+---
+📦 **Download ZIP File**: [{zip_file_data['filename']}]({asset_url})
+_(Contains main and feat files for this specific chart/model)_
+
+🔗 **View in StaffView**: Upload the ZIP file at [{app_url}]({app_url}) to compare interactively
+"""
+                                
+                                update_query = """
+                                mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
+                                    issueUpdate(id: $id, input: $input) {
+                                        success
+                                        issue {
+                                            id
+                                        }
+                                    }
+                                }
+                                """
+                                
+                                update_vars = {
+                                    'id': issue_id,
+                                    'input': {
+                                        'description': updated_description
+                                    }
+                                }
+                                
+                                update_result = linear_graphql_request(update_query, update_vars)
+                                
+                                if 'errors' in update_result:
+                                    print(f"   ❌ Failed to update issue description: {update_result['errors']}", flush=True)
+                                elif update_result.get('data', {}).get('issueUpdate', {}).get('success'):
+                                    print(f"   ✅ Issue description updated with ZIP download link!", flush=True)
+                                    print(f"\n{'='*60}", flush=True)
+                                    print(f"🎉 SUCCESS! Linear issue {issue_identifier} created with ZIP!", flush=True)
+                                    print(f"{'='*60}\n", flush=True)
+                                else:
+                                    print(f"   ⚠️ Unexpected update response: {update_result}", flush=True)
+                            else:
+                                print(f"   ❌ ZIP upload failed with status: {upload_response.status_code}", flush=True)
+                                print(f"   Response: {upload_response.text}", flush=True)
+                    else:
+                        print(f"   ❌ Unexpected upload response: {upload_result}", flush=True)
+                        
+                except Exception as e:
+                    print(f"❌ Failed to attach ZIP file to issue: {str(e)}", flush=True)
+                    import traceback
+                    traceback.print_exc()
+                    # Continue anyway, issue was created successfully
+            else:
+                print(f"⚠️ No ZIP file data available - scroll files not found in artifacts directory", flush=True)
+                print(f"   Expected path: {ARTIFACTS_DIR}/{folder_id}/main/{file_id}.csv", flush=True)
+                print(f"   Expected path: {ARTIFACTS_DIR}/{folder_id}/feat/{file_id}.csv", flush=True)
+                print(f"   Please upload scrolls first from the dashboard at http://localhost:5001/", flush=True)
+            
+            return jsonify({
+                'success': True,
+                'issueId': issue_id,
+                'issueIdentifier': issue_identifier,
+                'issueUrl': issue_url
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Failed to create issue'}), 500
+    except (KeyError, TypeError) as e:
+        return jsonify({'success': False, 'error': f'Failed to parse issue response: {str(e)}'}), 500
+
+
 if __name__ == '__main__':
     print("⚡ Starting StaffView...")
     print("   Gandalf's tool for regression clarity")
     print(f"   Using scrolls from: {ARTIFACTS_DIR}")
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5001, host='127.0.0.1')
 
