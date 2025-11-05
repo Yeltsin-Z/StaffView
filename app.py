@@ -10,7 +10,7 @@ import sys
 import zipfile
 import shutil
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, send_from_directory, session, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file, session, redirect, url_for, flash
 import csv
 from io import StringIO, BytesIO
 from difflib import unified_diff, SequenceMatcher
@@ -379,6 +379,33 @@ def upload_artifact():
             'artifact_count': len(structure),
             'structure': structure
         })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/download-zip/<filename>')
+def download_zip(filename):
+    """
+    Download ZIP file from linear_attachments folder
+    Note: No login required - this endpoint is used by Linear attachments
+    Files are accessed via specific filenames only (tenant-chart-id.zip)
+    """
+    try:
+        # Security: Only allow downloading from linear_attachments directory
+        # and prevent directory traversal attacks
+        if '..' in filename or '/' in filename:
+            return jsonify({'error': 'Invalid filename'}), 400
+        
+        zip_path = LINEAR_ATTACHMENTS_DIR / filename
+        if not zip_path.exists():
+            return jsonify({'error': 'ZIP file not found'}), 404
+        
+        return send_file(
+            zip_path,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=filename
+        )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -872,7 +899,39 @@ def create_linear_issue():
                 print(f"✅ ZIP file data found: {zip_file_data['filename']} ({zip_file_data['size']} bytes)", flush=True)
                 print(f"✅ ZIP file saved at: {zip_file_data['filepath']}", flush=True)
                 try:
-                    # Update issue description with ZIP file information
+                    # Create attachment URL for the ZIP file
+                    zip_download_url = f"{app_url}/api/download-zip/{zip_file_data['filename']}"
+                    print(f"   Creating attachment with URL: {zip_download_url}", flush=True)
+                    
+                    # Create attachment in Linear using attachmentLinkURL
+                    attachment_query = """
+                    mutation AttachmentLinkURL($issueId: String!, $url: String!, $title: String) {
+                        attachmentLinkURL(issueId: $issueId, url: $url, title: $title) {
+                            success
+                            lastSyncId
+                        }
+                    }
+                    """
+                    
+                    attachment_vars = {
+                        'issueId': issue_id,
+                        'url': zip_download_url,
+                        'title': f"📦 {zip_file_data['filename']}"
+                    }
+                    
+                    attachment_result = linear_graphql_request(attachment_query, attachment_vars)
+                    
+                    if 'errors' in attachment_result:
+                        print(f"   ❌ Failed to create attachment: {attachment_result['errors']}", flush=True)
+                        attachment_created = False
+                    elif attachment_result.get('data', {}).get('attachmentLinkURL', {}).get('success'):
+                        print(f"   ✅ Attachment created successfully!", flush=True)
+                        attachment_created = True
+                    else:
+                        print(f"   ⚠️ Unexpected attachment response: {attachment_result}", flush=True)
+                        attachment_created = False
+                    
+                    # Update issue description
                     updated_description = f"""📊 Regression Diff Report
 
 **File**: {file_id}
@@ -887,10 +946,10 @@ def create_linear_issue():
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
 
 ---
-📦 **ZIP File**: `{zip_file_data['filename']}` ({zip_file_data['size']} bytes)
-_Saved in `linear_attachments/` folder - contains main and feat files for this chart/model_
+📦 **ZIP File**: `{zip_file_data['filename']}` ({zip_file_data['size']} bytes) - {'**See attachments above** ↑' if attachment_created else 'Available in linear_attachments/ folder'}
+_Contains main and feat files for this chart/model_
 
-🔗 **View in StaffView**: Upload scroll files at [{app_url}]({app_url}) to compare interactively
+🔗 **View in StaffView**: Upload the ZIP at [{app_url}]({app_url}) to compare interactively
 """
                     
                     update_query = """
@@ -918,9 +977,10 @@ _Saved in `linear_attachments/` folder - contains main and feat files for this c
                     elif update_result.get('data', {}).get('issueUpdate', {}).get('success'):
                         print(f"   ✅ Issue description updated!", flush=True)
                         print(f"\n{'='*60}", flush=True)
-                        print(f"🎉 SUCCESS! Linear issue {issue_identifier} created!", flush=True)
+                        print(f"🎉 SUCCESS! Linear issue {issue_identifier} created with attachment!", flush=True)
                         print(f"   📎 ZIP File: {zip_file_data['filename']}", flush=True)
                         print(f"   📁 Location: {zip_file_data['filepath']}", flush=True)
+                        print(f"   🔗 Download URL: {zip_download_url}", flush=True)
                         print(f"{'='*60}\n", flush=True)
                     else:
                         print(f"   ⚠️ Unexpected update response: {update_result}", flush=True)
