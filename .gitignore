@@ -13,6 +13,7 @@ server.log
 .vscode/
 .idea/
 .env
+start_local.sh
 *.pem
 *.key
 *.crt

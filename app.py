@@ -932,25 +932,109 @@ def create_linear_issue():
                             
                             print(f"   File content size: {len(file_content)} bytes", flush=True)
                             
-                            # Upload to Google Cloud Storage with minimal headers
-                            # Only include Content-Type (host is auto-added by requests)
-                            upload_response = requests.put(
-                                upload_url,
-                                data=file_content,
-                                headers={
-                                    'Content-Type': 'application/zip'
-                                }
-                            )
-                            
-                            print(f"   Upload response status: {upload_response.status_code}", flush=True)
-                            
-                            if upload_response.status_code in [200, 201]:
-                                print(f"   ✅ ZIP file uploaded successfully!", flush=True)
-                                print(f"   Asset URL: {asset_url}", flush=True)
-                                print(f"   Step 3: Updating issue description with ZIP download link...", flush=True)
+                            # Upload to Google Cloud Storage using signed URL
+                            # Send as raw bytes with only Content-Type header
+                            try:
+                                print(f"   Attempting upload to: {upload_url[:100]}...", flush=True)
+                                print(f"   File size being uploaded: {len(file_content)} bytes", flush=True)
+                                print(f"   Content-Length will be: {len(file_content)}", flush=True)
                                 
-                                # Update the issue description to include the download link
-                                updated_description = f"""📊 Regression Diff Report
+                                # Try upload with just Content-Type (no Content-Length, let requests add it)
+                                upload_response = requests.put(
+                                    upload_url,
+                                    data=file_content,
+                                    headers={'Content-Type': 'application/zip'},
+                                    timeout=30
+                                )
+                                
+                                print(f"   Upload response status: {upload_response.status_code}", flush=True)
+                                if upload_response.status_code != 200:
+                                    print(f"   Upload response text: {upload_response.text[:500]}", flush=True)
+                                    print(f"   ⚠️ Upload failed, but ZIP is saved locally at: {zip_filepath}", flush=True)
+                                    print(f"   Will create attachment with note about local file...", flush=True)
+                            except Exception as upload_error:
+                                print(f"   ❌ Upload exception: {str(upload_error)}", flush=True)
+                                upload_response = None
+                            
+                            if upload_response and upload_response.status_code in [200, 201]:
+                                print(f"   ✅ ZIP file uploaded successfully to Google Cloud Storage!", flush=True)
+                                print(f"   Asset URL: {asset_url}", flush=True)
+                                print(f"   Step 3: Creating attachment in Linear issue...", flush=True)
+                                
+                                # Create the attachment in Linear
+                                attachment_query = """
+                                mutation AttachmentCreate($input: AttachmentCreateInput!) {
+                                    attachmentCreate(input: $input) {
+                                        success
+                                        attachment {
+                                            id
+                                            title
+                                            url
+                                        }
+                                    }
+                                }
+                                """
+                                
+                                attachment_vars = {
+                                    'input': {
+                                        'issueId': issue_id,
+                                        'title': zip_file_data['filename'],
+                                        'url': asset_url,
+                                        'subtitle': f"Scroll files for {folder_id}-{file_id}"
+                                    }
+                                }
+                                
+                                print(f"   Creating attachment with title: {zip_file_data['filename']}", flush=True)
+                                print(f"   Attachment input: {attachment_vars}", flush=True)
+                                attachment_result = linear_graphql_request(attachment_query, attachment_vars)
+                                print(f"   Attachment result: {attachment_result}", flush=True)
+                                
+                                if 'errors' in attachment_result:
+                                    print(f"   ❌ Failed to create attachment: {attachment_result['errors']}", flush=True)
+                                    # Try alternate approach: use attachmentLinkURL
+                                    print(f"   Trying alternate approach with attachmentLinkURL...", flush=True)
+                                    link_query = """
+                                    mutation AttachmentLinkURL($issueId: String!, $url: String!, $title: String, $subtitle: String) {
+                                        attachmentLinkURL(issueId: $issueId, url: $url, title: $title, subtitle: $subtitle) {
+                                            success
+                                            lastSyncId
+                                        }
+                                    }
+                                    """
+                                    link_vars = {
+                                        'issueId': issue_id,
+                                        'url': asset_url,
+                                        'title': zip_file_data['filename'],
+                                        'subtitle': f"Scroll files for {folder_id}-{file_id}"
+                                    }
+                                    print(f"   Link vars: {link_vars}", flush=True)
+                                    link_result = linear_graphql_request(link_query, link_vars)
+                                    print(f"   Link result: {link_result}", flush=True)
+                                    
+                                    if link_result.get('data', {}).get('attachmentLinkURL', {}).get('success'):
+                                        print(f"   ✅ Attachment linked successfully using alternate method!", flush=True)
+                                        attachment_result = link_result  # Use this for success flow
+                                    else:
+                                        print(f"   ❌ Both attachment methods failed", flush=True)
+                                
+                                # Check if either method succeeded
+                                attachment_success = (
+                                    attachment_result.get('data', {}).get('attachmentCreate', {}).get('success') or
+                                    attachment_result.get('data', {}).get('attachmentLinkURL', {}).get('success')
+                                )
+                                
+                                if attachment_success:
+                                    if 'attachmentCreate' in attachment_result.get('data', {}):
+                                        attachment_data = attachment_result['data']['attachmentCreate']['attachment']
+                                        print(f"   ✅ Attachment created successfully!", flush=True)
+                                        print(f"   Attachment ID: {attachment_data['id']}", flush=True)
+                                        print(f"   Attachment URL: {attachment_data['url']}", flush=True)
+                                    else:
+                                        print(f"   ✅ Attachment linked successfully!", flush=True)
+                                    
+                                    # Update the issue description to include reference to the attachment
+                                    print(f"   Step 4: Updating issue description...", flush=True)
+                                    updated_description = f"""📊 Regression Diff Report
 
 **File**: {file_id}
 **Tenant**: {folder_id}
@@ -964,44 +1048,82 @@ def create_linear_issue():
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
 
 ---
-📦 **Download ZIP File**: [{zip_file_data['filename']}]({asset_url})
-_(Contains main and feat files for this specific chart/model)_
+📦 **Attached Files**: The ZIP file containing main and feat files for this chart/model is attached to this issue.
 
-🔗 **View in StaffView**: Upload the ZIP file at [{app_url}]({app_url}) to compare interactively
+🔗 **View in StaffView**: Upload the attached ZIP at [{app_url}]({app_url}) to compare interactively
 """
+                                    
+                                    update_query = """
+                                    mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
+                                        issueUpdate(id: $id, input: $input) {
+                                            success
+                                            issue {
+                                                id
+                                            }
+                                        }
+                                    }
+                                    """
+                                    
+                                    update_vars = {
+                                        'id': issue_id,
+                                        'input': {
+                                            'description': updated_description
+                                        }
+                                    }
+                                    
+                                    update_result = linear_graphql_request(update_query, update_vars)
+                                    
+                                    if 'errors' in update_result:
+                                        print(f"   ❌ Failed to update issue description: {update_result['errors']}", flush=True)
+                                    elif update_result.get('data', {}).get('issueUpdate', {}).get('success'):
+                                        print(f"   ✅ Issue description updated!", flush=True)
+                                        print(f"\n{'='*60}", flush=True)
+                                        print(f"🎉 SUCCESS! Linear issue {issue_identifier} created with ZIP attachment!", flush=True)
+                                        print(f"   📎 Attachment: {zip_file_data['filename']}", flush=True)
+                                        print(f"{'='*60}\n", flush=True)
+                                    else:
+                                        print(f"   ⚠️ Unexpected update response: {update_result}", flush=True)
+                                else:
+                                    print(f"   ⚠️ Attachment creation failed - continuing without attachment", flush=True)
+                                    print(f"   Full attachment response: {attachment_result}", flush=True)
+                            elif upload_response:
+                                print(f"   ❌ ZIP upload to GCS failed with status: {upload_response.status_code}", flush=True)
+                                print(f"   Response: {upload_response.text[:500]}", flush=True)
+                                print(f"   💡 ZIP file is saved locally at: {zip_filepath}", flush=True)
+                                print(f"   Updating issue description with local file info...", flush=True)
                                 
+                                # Update description with info about local ZIP file
+                                fallback_description = f"""📊 Regression Diff Report
+
+**File**: {file_id}
+**Tenant**: {folder_id}
+
+**Statistics**:
+✅ Added: {stats.get('added', 0)}
+❌ Removed: {stats.get('removed', 0)}
+⚠️ Modified: {stats.get('modified', 0)}
+⚪ Unchanged: {stats.get('unchanged', 0)}
+
+**Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
+
+---
+📦 **ZIP File**: `{zip_file_data['filename']}` ({zip_file_data['size']} bytes)
+_Note: ZIP file is saved in `linear_attachments/` folder on StaffView server_
+
+🔗 **View in StaffView**: Upload scroll files at [{app_url}]({app_url}) to compare interactively
+"""
                                 update_query = """
                                 mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
                                     issueUpdate(id: $id, input: $input) {
                                         success
-                                        issue {
-                                            id
-                                        }
                                     }
                                 }
                                 """
-                                
-                                update_vars = {
-                                    'id': issue_id,
-                                    'input': {
-                                        'description': updated_description
-                                    }
-                                }
-                                
-                                update_result = linear_graphql_request(update_query, update_vars)
-                                
-                                if 'errors' in update_result:
-                                    print(f"   ❌ Failed to update issue description: {update_result['errors']}", flush=True)
-                                elif update_result.get('data', {}).get('issueUpdate', {}).get('success'):
-                                    print(f"   ✅ Issue description updated with ZIP download link!", flush=True)
-                                    print(f"\n{'='*60}", flush=True)
-                                    print(f"🎉 SUCCESS! Linear issue {issue_identifier} created with ZIP!", flush=True)
-                                    print(f"{'='*60}\n", flush=True)
-                                else:
-                                    print(f"   ⚠️ Unexpected update response: {update_result}", flush=True)
+                                update_vars = {'id': issue_id, 'input': {'description': fallback_description}}
+                                linear_graphql_request(update_query, update_vars)
+                                print(f"   ✅ Issue description updated with local file info", flush=True)
                             else:
-                                print(f"   ❌ ZIP upload failed with status: {upload_response.status_code}", flush=True)
-                                print(f"   Response: {upload_response.text}", flush=True)
+                                print(f"   ❌ ZIP upload failed - no response received", flush=True)
                     else:
                         print(f"   ❌ Unexpected upload response: {upload_result}", flush=True)
                         
