@@ -384,18 +384,10 @@ def upload_artifact():
 
 
 @app.route('/api/download-zip/<filename>')
+@login_required
 def download_zip(filename):
-    """
-    Download ZIP file from linear_attachments folder
-    Note: No login required - this endpoint is used by Linear attachments
-    Files are accessed via specific filenames only (tenant-chart-id.zip)
-    """
+    """Download ZIP file from linear_attachments folder"""
     try:
-        # Security: Only allow downloading from linear_attachments directory
-        # and prevent directory traversal attacks
-        if '..' in filename or '/' in filename:
-            return jsonify({'error': 'Invalid filename'}), 400
-        
         zip_path = LINEAR_ATTACHMENTS_DIR / filename
         if not zip_path.exists():
             return jsonify({'error': 'ZIP file not found'}), 404
@@ -946,10 +938,9 @@ def create_linear_issue():
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
 
 ---
-📦 **ZIP File**: `{zip_file_data['filename']}` ({zip_file_data['size']} bytes) - {'**See attachments above** ↑' if attachment_created else 'Available in linear_attachments/ folder'}
-_Contains main and feat files for this chart/model_
+📦 **Scroll Files**: Download the attached ZIP file above to access the main and feat CSV files for this chart/model.
 
-🔗 **View in StaffView**: Upload the ZIP at [{app_url}]({app_url}) to compare interactively
+🔗 **Interactive Comparison**: Upload the ZIP file at [{app_url}]({app_url}) to view the full side-by-side diff in StaffView.
 """
                     
                     update_query = """
