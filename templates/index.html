@@ -341,97 +341,6 @@
             flex-wrap: wrap;
         }
 
-        /* Export dropdown container */
-        .export-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .download-diff-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .download-diff-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .download-diff-button:active {
-            transform: translateY(0);
-        }
-
-        /* Dropdown menu */
-        .export-dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 5px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            min-width: 180px;
-            overflow: hidden;
-            animation: dropdownSlide 0.2s ease;
-        }
-
-        @keyframes dropdownSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .export-dropdown-menu.show {
-            display: block;
-        }
-
-        .export-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            color: #24292e;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-
-        .export-option:hover {
-            background: #f6f8fa;
-        }
-
-        .export-option:active {
-            background: #e1e4e8;
-        }
-
-        .export-option span:first-child {
-            font-size: 1.2em;
-        }
-
         .linear-button {
             display: inline-flex;
             align-items: center;
@@ -1445,22 +1354,6 @@
                         <span><strong>${data.stats.unchanged}</strong> unchanged</span>
                     </div>
                 </div>
-                <div class="export-dropdown">
-                    <button class="download-diff-button" id="exportBtn" data-folder="${data.folder_id}" data-file="${data.file_id}">
-                        <span>⬇️</span>
-                        <span>Export</span>
-                    </button>
-                    <div class="export-dropdown-menu" id="exportDropdown">
-                        <button class="export-option" id="exportHtmlBtn" data-folder="${data.folder_id}" data-file="${data.file_id}">
-                            <span>📄</span>
-                            <span>Export as HTML</span>
-                        </button>
-                        <button class="export-option" id="exportPdfBtn" data-folder="${data.folder_id}" data-file="${data.file_id}">
-                            <span>📑</span>
-                            <span>Export as PDF</span>
-                        </button>
-                    </div>
-                </div>
             `;
 
             // Create diff container
@@ -1472,49 +1365,6 @@
             editorContent.appendChild(header);
             editorContent.appendChild(statsBar);
             editorContent.appendChild(diffContainer);
-
-            // Add event listeners for export dropdown
-            const exportBtn = document.getElementById('exportBtn');
-            const exportDropdown = document.getElementById('exportDropdown');
-            const exportHtmlBtn = document.getElementById('exportHtmlBtn');
-            const exportPdfBtn = document.getElementById('exportPdfBtn');
-
-            // Toggle dropdown
-            if (exportBtn) {
-                exportBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    exportDropdown.classList.toggle('show');
-                });
-            }
-
-            // Export as HTML
-            if (exportHtmlBtn) {
-                exportHtmlBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const folderId = this.getAttribute('data-folder');
-                    const fileId = this.getAttribute('data-file');
-                    downloadDiffAsHTML(data, folderId, fileId);
-                    exportDropdown.classList.remove('show');
-                });
-            }
-
-            // Export as PDF
-            if (exportPdfBtn) {
-                exportPdfBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const folderId = this.getAttribute('data-folder');
-                    const fileId = this.getAttribute('data-file');
-                    downloadDiffAsPDF(data, folderId, fileId);
-                    exportDropdown.classList.remove('show');
-                });
-            }
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (exportDropdown && !e.target.closest('.export-dropdown')) {
-                    exportDropdown.classList.remove('show');
-                }
-            });
 
             // Add event listener for Linear button
             const linearBtn = document.getElementById('createLinearBtn');
@@ -1843,7 +1693,9 @@
         }
 
         // Download diff as HTML with CSS styling
-        function downloadDiffAsHTML(data, folderId, fileId) {
+        // Export functions removed
+
+        // Linear Integration
             try {
                 const mainContent = data.main_content || '';
                 const featContent = data.feat_content || '';
