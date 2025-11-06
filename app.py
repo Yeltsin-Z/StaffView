@@ -971,7 +971,7 @@ def create_linear_issue():
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
 {attachment_info}
 ---
-📦 **Scroll Files**: Download the attached ZIP file from Resources that contains main and feat files for this {resource_type}.
+📜 **Scroll Files**: Download the attached ZIP file from Resources that contains main and feat files for this {resource_type}.
 
 🔗 **Interactive Comparison**: Upload the ZIP file at [{app_url}]({app_url}) to view the full side-by-side diff in StaffView.
 """
