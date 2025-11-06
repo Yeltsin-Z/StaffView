@@ -951,6 +951,11 @@ def create_linear_issue():
                     else:
                         resource_type = 'chart/model'
                     
+                    # Build attachment info message
+                    attachment_info = ""
+                    if attachment_created:
+                        attachment_info = f"\n📦 **Auto-attached**: `{zip_file_data['filename']}` (main + feat files)\n"
+                    
                     # Update issue description
                     updated_description = f"""📊 Regression Diff Report
 
@@ -964,7 +969,7 @@ def create_linear_issue():
 ⚪ Unchanged: {stats.get('unchanged', 0)}
 
 **Total Changes**: {stats.get('added', 0) + stats.get('removed', 0) + stats.get('modified', 0)} items affected
-
+{attachment_info}
 ---
 📦 **Scroll Files**: Download the attached ZIP file from Resources that contains main and feat files for this {resource_type}.
 
