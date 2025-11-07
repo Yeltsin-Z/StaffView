@@ -1,10 +1,10 @@
 #!/bin/bash
-# StaffView EC2 Deployment Script
+# WizardView EC2 Deployment Script
 # Run this script ON YOUR EC2 INSTANCE after cloning the repository
 
 set -e  # Exit on error
 
-echo "⚡ StaffView EC2 Deployment Script"
+echo "🧙‍♂️ WizardView EC2 Deployment Script"
 echo "=================================="
 echo ""
 
@@ -52,7 +52,7 @@ cd "$APP_DIR"
 # Check if this is a git repository
 if [ ! -d ".git" ]; then
     echo "Error: Not a git repository. Please clone the repository first:"
-    echo "  git clone https://github.com/Yeltsin-Z/StaffView.git $APP_DIR"
+    echo "  git clone https://github.com/Yeltsin-Z/WizardView.git $APP_DIR"
     exit 1
 fi
 
@@ -81,7 +81,7 @@ echo ""
 echo -e "${BLUE}Step 6: Setting up systemd service...${NC}"
 sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
 [Unit]
-Description=StaffView - Regression Artifacts Comparison Tool
+Description=WizardView - Regression Artifacts Comparison Tool
 After=network.target
 
 [Service]
@@ -164,7 +164,7 @@ echo -e "${GREEN}✓ Firewall configured${NC}"
 echo ""
 
 echo -e "${GREEN}=================================="
-echo "⚡ StaffView Deployment Complete!"
+echo "🧙‍♂️ WizardView Deployment Complete!"
 echo "==================================${NC}"
 echo ""
 echo "Application Status:"

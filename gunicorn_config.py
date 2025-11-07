@@ -1,4 +1,4 @@
-"""Gunicorn configuration for StaffView production deployment"""
+"""Gunicorn configuration for WizardView production deployment"""
 
 import multiprocessing
 import os

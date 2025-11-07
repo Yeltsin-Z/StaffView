@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-StaffView - Gandalf's tool for regression clarity
+WizardView - Gandalf's tool for regression clarity
 Compare regression test scrolls from GitHub Actions
 Compare, analyze, and illuminate test differences
 """
@@ -457,7 +457,7 @@ def health_check():
     """Health check endpoint for monitoring and keep-alive"""
     return jsonify({
         'status': 'healthy',
-        'service': 'StaffView',
+        'service': 'WizardView',
         'version': '1.0'
     }), 200
 
@@ -658,7 +658,7 @@ def create_linear_issue():
     print(f"{'='*60}\n", flush=True)
     
     # Create issue title
-    title = f"Gandalf's StaffView Report for {folder_id}-{file_id}"
+    title = f"Gandalf's WizardView Report for {folder_id}-{file_id}"
     
     # Get app URL (use Render deployment URL or environment variable)
     app_url = os.environ.get('STAFFVIEW_URL', 'https://staffview.onrender.com')
@@ -679,7 +679,7 @@ def create_linear_issue():
 
 ---
 📦 **Attached ZIP**: Contains main and feat files for this specific chart/model
-🔗 **View in StaffView**: Upload the attached ZIP at [{app_url}]({app_url}) to compare interactively
+🔗 **View in WizardView**: Upload the attached ZIP at [{app_url}]({app_url}) to compare interactively
 """
     
     # Step 1: Create ZIP file with only the specific chart/model files (if requested)
@@ -973,7 +973,7 @@ def create_linear_issue():
 ---
 📜 **Scroll Files**: Download the attached ZIP file from Resources that contains main and feat files for this {resource_type}.
 
-🔗 **Interactive Comparison**: Upload the ZIP file at [{app_url}]({app_url}) to view the full side-by-side diff in StaffView.
+🔗 **Interactive Comparison**: Upload the ZIP file at [{app_url}]({app_url}) to view the full side-by-side diff in WizardView.
 """
                     
                     update_query = """
@@ -1033,7 +1033,7 @@ def create_linear_issue():
 
 
 if __name__ == '__main__':
-    print("⚡ Starting StaffView...")
+    print("🧙‍♂️ Starting WizardView...")
     print("   Gandalf's tool for regression clarity")
     print(f"   Using scrolls from: {ARTIFACTS_DIR}")
     app.run(debug=True, port=5001, host='127.0.0.1')

@@ -7,7 +7,7 @@ import requests
 import time
 from datetime import datetime
 
-# Your StaffView URL
+# Your WizardView URL
 STAFFVIEW_URL = "https://staffview.onrender.com"  # Update with your actual URL
 PING_INTERVAL = 14 * 60  # 14 minutes in seconds
 

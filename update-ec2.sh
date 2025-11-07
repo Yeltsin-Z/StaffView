@@ -1,10 +1,10 @@
 #!/bin/bash
-# StaffView EC2 Update Script
-# Run this script to update StaffView on your EC2 instance
+# WizardView EC2 Update Script
+# Run this script to update WizardView on your EC2 instance
 
 set -e  # Exit on error
 
-echo "⚡ Updating StaffView..."
+echo "🧙‍♂️ Updating WizardView..."
 echo ""
 
 # Colors
