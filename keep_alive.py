@@ -8,13 +8,13 @@ import time
 from datetime import datetime
 
 # Your WizardView URL
-STAFFVIEW_URL = "https://staffview.onrender.com"  # Update with your actual URL
+WIZARDVIEW_URL = "https://wizardview.onrender.com"  # Update with your actual URL
 PING_INTERVAL = 14 * 60  # 14 minutes in seconds
 
 def ping_service():
     """Ping the service to keep it alive"""
     try:
-        response = requests.get(f"{STAFFVIEW_URL}/api/structure", timeout=30)
+        response = requests.get(f"{WIZARDVIEW_URL}/api/structure", timeout=30)
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if response.status_code in [200, 302]:  # 302 is redirect to login
             print(f"[{timestamp}] ✓ Service is alive (status: {response.status_code})")
@@ -26,7 +26,7 @@ def ping_service():
         print(f"[{timestamp}] ✗ Error: {e}")
 
 if __name__ == "__main__":
-    print(f"Starting keep-alive service for {STAFFVIEW_URL}")
+    print(f"Starting keep-alive service for {WIZARDVIEW_URL}")
     print(f"Pinging every {PING_INTERVAL // 60} minutes")
     print("-" * 60)
     

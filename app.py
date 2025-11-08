@@ -661,7 +661,7 @@ def create_linear_issue():
     title = f"Gandalf's WizardView Report for {folder_id}-{file_id}"
     
     # Get app URL (use Render deployment URL or environment variable)
-    app_url = os.environ.get('STAFFVIEW_URL', 'https://staffview.onrender.com')
+    app_url = os.environ.get('WIZARDVIEW_URL', 'https://wizardview.onrender.com')
     
     # Create issue description with app link
     description = f"""📊 Regression Diff Report
